@@ -1,0 +1,10 @@
+#include <stdio.h>;#include <ctype.h>;#include <string.h>;
+#include <stdlib.h>;void func1(){	char buffer[1024];    printf("Please enter your user id :");    fgets(buffer, 1024, stdin);     if (!isalpha(buffer[0]))     {     char errormsg[1044];          strncpy(errormsg, buffer,1024);     strcat(errormsg, " is not  a valid ID");     throw errormsg;	}}
+
+void func2(int fd) {      char *buf2;
+	size_t len;     read(fd, &len, sizeof(len));     buf = malloc(len+1);      read(fd, buf2, len);      buf2[len] = '\0';}
+
+void func3(int fd){     char *buf3;     int i, len;     read(fd, &len, sizeof(len));     if (len > 8000) {      error("too large length");      return; }      buf3 = malloc(len);      read(fd, buf3,len);          }main()
+
+char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo"; char *buffer = (char *)malloc(10 * sizeof(char)); strcpy(buffer, foo);
+{try{func1();}catch(char *message){	fprintf(stderr, message);}}

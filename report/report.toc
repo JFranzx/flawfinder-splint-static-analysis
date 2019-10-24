@@ -1,0 +1,9 @@
+\babel@toc {english}{}
+\contentsline {section}{\numberline {1}Static analysis tools}{2}
+\contentsline {subsection}{\numberline {1.1}Flawfinder}{2}
+\contentsline {subsection}{\numberline {1.2}Splint}{2}
+\contentsline {section}{\numberline {2}Output description}{3}
+\contentsline {subsection}{\numberline {2.1}Flawfinder output}{3}
+\contentsline {subsection}{\numberline {2.2}Splint output}{7}
+\contentsline {section}{\numberline {3}Corrected version of the fragment}{8}
+\contentsline {section}{\numberline {4}Conclusion}{9}
