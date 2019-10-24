@@ -1,4 +1,4 @@
-﻿#include <stdio.h>
+#include <stdio.h>
 #include <ctype.h>
 #include <unistd.h>
 #include <string.h>
@@ -9,8 +9,10 @@ void func1()
 	char buffer[1024];
   printf("Please enter your user id :");
   fgets(buffer, 1024, stdin);
+ 
   if (!isalpha(buffer[0]))
   {
+
      char errormsg[1044];
      strncpy(errormsg, buffer,1024);
      strcat(errormsg, " is not  a valid ID");
