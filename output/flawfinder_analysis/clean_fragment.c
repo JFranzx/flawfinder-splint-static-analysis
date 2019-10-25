@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include <bsd/string.h>
 void func1()
 {	
 	char buffer[1024];
@@ -52,7 +52,7 @@ int  main()
 {
 	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
 	char *buffer = (char *)malloc(10 * sizeof(char));
-	snprintf(buffer,sizeof(buffer),"%s",foo);
+	strlcpy(buffer,foo,sizeof(buffer));
 	func1();
 	func3(sizeof(*foo));
 }
