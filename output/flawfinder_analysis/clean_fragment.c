@@ -12,10 +12,11 @@ void func1()
  
   if (!isalpha(buffer[0]))
   {
-
+     /* Flawfinder: ignore */
      char errormsg[1044];
      strncpy(errormsg, buffer,1024);
-     strcat(errormsg, " is not  a valid ID");
+     // deleted one space char
+     strcat(errormsg, " is not a valid ID");
  	}
 }
 
