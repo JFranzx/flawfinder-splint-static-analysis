@@ -52,7 +52,7 @@ int  main()
 {
 	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
 	char *buffer = (char *)malloc(10 * sizeof(char));
-	strlcpy(buffer, foo,sizeof(buffer));
+	snprintf(buffer,sizeof(buffer),"%s",foo);
 	func1();
 	func3(sizeof(*foo));
 }
