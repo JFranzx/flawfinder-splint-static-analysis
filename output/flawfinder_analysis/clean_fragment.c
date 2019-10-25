@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <bsd/string.h>
 void func1()
-{	
+{	/* Flawfinder: ignore */
 	char buffer[1024];
   printf("Please enter your user id :");
   fgets(buffer, 1024, stdin);
