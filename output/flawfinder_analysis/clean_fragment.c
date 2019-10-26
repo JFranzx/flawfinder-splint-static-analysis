@@ -25,10 +25,15 @@ void func2(int f2d)
 {
 	char *buf2;
 	size_t len;
+	size_t limit = 1024;
   //false positive: this fnction read sizeof(len) bytes from f2d and store them in len.
   // space is enough: false positive
   /* Flawfinder: ignore */
   read(f2d, &len, sizeof(len));
+  //assigned a max length to len. This is useful because if an attacker manage to set  the value of len  as the max integer value
+  // this causes an integer overflow in the malloc function (len +1). max_int +1 = 0.
+ // this integer overflow causes a buffer overflow in the last read function. (the program try to read and store len bytes into a buffer of size 0) 
+  if(len > limit) return;
   buf2 = malloc(len+1); 
   read(f2d, buf2, len); 
   buf2[len] = '\0';
