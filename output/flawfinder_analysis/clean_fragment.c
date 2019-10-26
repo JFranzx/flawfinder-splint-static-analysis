@@ -67,7 +67,7 @@ int  main()
 	char *buffer = (char *)malloc(10 * sizeof(char));
 	strlcpy(buffer,foo,sizeof(buffer));
 	func1();
-	//func3(sizeof(*foo));
+	func3(sizeof(*foo));
 }
 
 
