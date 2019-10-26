@@ -35,6 +35,7 @@ void func2(int f2d)
  // this integer overflow causes a buffer overflow in the last read function. (the program try to read and store len bytes into a buffer of size 0) 
   if(len > limit) return;
   buf2 = malloc(len+1); 
+ /* Flawfinder: ignore */
   read(f2d, buf2, len); 
   buf2[len] = '\0';
 
@@ -43,16 +44,19 @@ void func2(int f2d)
 
 void func3(int f3d)
 {
-	char *buf3;
+  char *buf3;
   int len;
+  /* Flawfinder: ignore */
   read(f3d, &len, sizeof(len));
-  if (len > 8000) 
+  if (len < 0 || len > 8000) 
   { 
   	perror("too large length");
   	return; 
-	}
-  buf3 = malloc(len);
-  read(f3d, buf3,len);        
+  }
+  buf3 = malloc(len+1);
+  /* Flawfinder: ignore */
+  read(f3d, buf3,len);
+  buf3[len] = '\0';        
 }
 
 
