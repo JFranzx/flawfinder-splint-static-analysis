@@ -14,9 +14,9 @@ void func1()
   {
      /* Flawfinder: ignore */
      char errormsg[1044];
-     strncpy(errormsg, buffer,1024);
+     strlcpy(errormsg, buffer,1024);
      // deleted one space char
-     strcat(errormsg, " is not a valid ID");
+     strlcat(errormsg, " is not a valid ID",sizeof(errormsg));
  	}
 }
 
@@ -55,7 +55,7 @@ int  main()
 	char *buffer = (char *)malloc(10 * sizeof(char));
 	strlcpy(buffer,foo,sizeof(buffer));
 	func1();
-	func3(sizeof(*foo));
+	//func3(sizeof(*foo));
 }
 
 
