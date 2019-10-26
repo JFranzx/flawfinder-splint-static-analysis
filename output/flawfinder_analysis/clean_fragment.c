@@ -25,6 +25,9 @@ void func2(int f2d)
 {
 	char *buf2;
 	size_t len;
+  //false positive: this fnction read sizeof(len) bytes from f2d and store them in len.
+  // space is enough: false positive
+  /* Flawfinder: ignore */
   read(f2d, &len, sizeof(len));
   buf2 = malloc(len+1); 
   read(f2d, buf2, len); 
