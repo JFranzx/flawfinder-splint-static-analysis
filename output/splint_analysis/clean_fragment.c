@@ -5,10 +5,10 @@
 #include <stdlib.h>
 
 
-void func2(int f2d);
 
 
-void func1()
+
+static void func1()
 {	
 	char buffer[1024];
   printf("Please enter your user id :");
@@ -24,8 +24,8 @@ void func1()
  }
 }
 
-
-void func2(int f2d)
+/*@unused@*/
+static void func2(int f2d)
 {
 	char *buf2 = NULL;;
 	size_t len = 0;
@@ -57,7 +57,7 @@ void func2(int f2d)
 }
 
 
-void func3(int f3d)
+static void func3(int f3d)
 {
 	
 
@@ -93,7 +93,7 @@ char *buf3;
 int  main()
 {
 	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
-	printf("%ld",sizeof(*foo));
+	
 	char *buffer = (char *)malloc(10 * sizeof(char));
         if(buffer==NULL)
 	{
