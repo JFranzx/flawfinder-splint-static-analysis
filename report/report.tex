@@ -16,46 +16,56 @@
 
    \maketitle
    
-   \tableofcontents
+   
  
-  \newpage
 
 
-\section{Static analysis tools}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent elementum aliquam massa, eget vestibulum arcu porta lacinia. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nunc et turpis dignissim, viverra arcu id, eleifend risus. Nulla facilisi. Sed venenatis placerat nibh, vel vehicula mi molestie a. Donec porttitor pharetra tortor id sodales. In ultricies, ex quis aliquet laoreet, sapien est pulvinar elit, vitae gravida metus lorem et mi. Nulla lacus ante, feugiat a diam at, sodales rutrum sapien. Nam sit amet odio nisl. Sed in auctor metus. Fusce viverra aliquet metus a condimentum.
- 
+\section*{Introduction}
+In this report, a static analysis of a C code fragment is performed using tools such as Splint and Flawfinder. \\
+In the first section there is a high-level description of the tools,which indicates their main strengths and weaknesses. \\
+The second section, shows the output of the respective tools (mainly vulnerabilities and problems) and the resolution of the latter.\\
+The last section presents the correct version of the program obtained by solving the problems reported with the analysis.
+
+
+\section{Static Analysis tools}
+This section describes main strenghts and weaknesses of Flawfinder and Splint.
 \subsection{Flawfinder}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent elementum aliquam massa, eget vestibulum arcu porta lacinia. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nunc et turpis dignissim, viverra arcu id, eleifend risus. Nulla facilisi. Sed venenatis placerat nibh, vel vehicula mi molestie a. Donec porttitor pharetra tortor id sodales. In ultricies, ex quis aliquet laoreet, sapien est pulvinar elit, vitae gravida metus lorem et mi. Nulla lacus ante, feugiat a diam at, sodales rutrum sapien. Nam sit amet odio nisl. Sed in auctor metus. Fusce viverra aliquet metus a condimentum.
+Flawfinder is a tool for statically scanning C/C++ source code for \texttt{possible security weaknesses}. These security weaknesses are called \textit{flaws} or \textit{hits} and are ordered by risk level.\\
+The risk level is shown in square brackets and can take value ranging from 0 (very little risk) to 5(high risk)\cite{flaw}.\\
+Furthermore it is compatible with CWE (Common
+Weakness Enumeration)\cite{flaw2}\cite{CWE} and may detect many of the most widespread and
+critical errors drafted in the 2011 CWE/SANS Top 25 list.\\
+Flawfinder is a simple and easy to use tool. This involves some pros and cons.\cite{flaw}\\
+Unlike programs such as Splint or gcc's warning flags, Flawfinder has no access to the program control flow, data flow and data type when looking for vulnerabilities.
+This leads the program to produce false positives or fail to report some vulnerabilities.
+In his favor, instead, we have that he can analyze programs that cannot be compiled,in a fast and efficient way.
+
+
+
+
+
+
 \subsection{Splint}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent elementum aliquam massa, eget vestibulum arcu porta lacinia. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nunc et turpis dignissim, viverra arcu id, eleifend risus. Nulla facilisi. Sed venenatis placerat nibh, vel vehicula mi molestie a. Donec porttitor pharetra tortor id sodales. In ultricies, ex quis aliquet laoreet, sapien est pulvinar elit, vitae gravida metus lorem et mi. Nulla lacus ante, feugiat a diam at, sodales rutrum sapien. Nam sit amet odio nisl. Sed in auctor metus. Fusce viverra aliquet metus a condimentum.
+Splint is a tool for statically checking C programs for \texttt{possible security vulnerabilities and coding mistakes}.\cite{splint}\\
+It is very useful for checking type,checking of variable and function assignments, efficiency, unused variables and function identifiers,unreachable code and possible memory leaks.\\
+Splint is a very light static analysis tool, it helps to improve the quality of the code, even if it does not help to eliminate all the security flaws and produces many warnings that can lead to confusion\cite{splint2}.
+
+
 
 \newpage
 \section{Output description}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent elementum aliquam massa, eget vestibulum arcu porta lacinia. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nunc et turpis dignissim, viverra arcu id, eleifend risus. Nulla facilisi. Sed venenatis placerat nibh, vel vehicula mi molestie a. Donec porttitor pharetra tortor id sodales. In ultricies, ex quis aliquet laoreet, sapien est pulvinar elit, vitae gravida metus lorem et mi. Nulla lacus ante, feugiat a diam at, sodales rutrum sapien. Nam sit amet odio nisl. Sed in auctor metus. Fusce viverra aliquet metus a condimentum.
+This section describes the outputs of the respective tools and shows how starting from these outputs, it is possible to improve the code and free it from vulnerabilities and errors that can lead to serious problems.
 
 \subsection{Flawfinder output}
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent elementum aliquam massa, eget vestibulum arcu porta lacinia. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nunc et turpis dignissim, viverra arcu id, eleifend risus. Nulla facilisi. Sed venenatis placerat nibh, vel vehicula mi molestie a. Donec porttitor pharetra tortor id sodales. In ultricies, ex quis aliquet laoreet, sapien est pulvinar elit, vitae gravida metus lorem et mi. Nulla lacus ante, feugiat a diam at, sodales rutrum sapien. Nam sit amet odio nisl. Sed in auctor metus. Fusce viverra aliquet metus a condimentum.
-\begin{figure}
-  \includegraphics[width=\linewidth]{{screenshots/fl_out_main.png}}
-  \caption{Main results}
-  \label{fig:fl1}
-\end{figure}
+
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent elementum aliquam massa, eget vestibulum arcu porta lacinia. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nunc et turpis dignissim, viverra arcu id, eleifend risus. Nulla facilisi. Sed venenatis placerat nibh, vel vehicula mi molestie a. Donec porttitor pharetra tortor id sodales. In ultricies, ex quis aliquet laoreet, sapien est pulvinar elit, vitae gravida metus lorem et mi. Nulla lacus ante, feugiat a diam at, sodales rutrum sapien. Nam sit amet odio nisl. Sed in auctor metus. Fusce viverra aliquet metus a condimentum.
 
-\begin{figure}
-  \includegraphics[width=\linewidth]{{screenshots/fl_out_final_results.png}}
-  \caption{Final results}
-  \label{fig:fl2}
-\end{figure}
+
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent elementum aliquam massa, eget vestibulum arcu porta lacinia. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nunc et turpis dignissim, viverra arcu id, eleifend risus. Nulla facilisi. Sed venenatis placerat nibh, vel vehicula mi molestie a. Donec porttitor pharetra tortor id sodales. In ultricies, ex quis aliquet laoreet, sapien est pulvinar elit, vitae gravida metus lorem et mi. Nulla lacus ante, feugiat a diam at, sodales rutrum sapien. Nam sit amet odio nisl. Sed in auctor metus. Fusce viverra aliquet metus a condimentum.
 
-\begin{figure}
-  \includegraphics[width=\linewidth]{{screenshots/fl_out_final_results.png}}
-  \caption{Analysis summary}
-  \label{fig:fl3}
-\end{figure}
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent elementum aliquam massa, eget vestibulum arcu porta lacinia. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nunc et turpis dignissim, viverra arcu id, eleifend risus. Nulla facilisi. Sed venenatis placerat nibh, vel vehicula mi molestie a. Donec porttitor pharetra tortor id sodales. In ultricies, ex quis aliquet laoreet, sapien est pulvinar elit, vitae gravida metus lorem et mi. Nulla lacus ante, feugiat a diam at, sodales rutrum sapien. Nam sit amet odio nisl. Sed in auctor metus. Fusce viverra aliquet metus a condimentum.
 
@@ -80,37 +90,30 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent elementum aliq
 
 \begin{thebibliography}{}
 
-  \bibitem{baker} Baker, N. 1966,
-      in Stellar Evolution,
-      ed.\ R. F. Stein \& A. G. W. Cameron
-      (Plenum, New York) 333
+  \bibitem{flaw} Flawfinder official documentation,\\\texttt{https://dwheeler.com/flawfinder/flawfinder.pdf}
 
-   \bibitem{balluch} Balluch, M. 1988,
-      A\&A, 200, 58
+\bibitem{flaw2} 
+The MITRE Corporation.
+\textit{Evaluation of Static Analysis Tools for Finding Vulnerabilities in Java and C/C++
+Source Code}.
+CWE(Common
+Weakness Enumeration)\cite{CWE}.
 
-   \bibitem{cox} Cox, J. P. 1980,
-      Theory of Stellar Pulsation
-      (Princeton University Press, Princeton) 165
+ \bibitem{CWE} CWE (Common
+Weakness Enumeration),\\\texttt{https://cwe.mitre.org/index.html}
 
-   \bibitem{cox69} Cox, A. N.,\& Stewart, J. N. 1969,
-      Academia Nauk, Scientific Information 15, 1
-
-   \bibitem{mizuno} Mizuno H. 1980,
-      Prog. Theor. Phys., 64, 544
-   
-   \bibitem{tscharnuter} Tscharnuter W. M. 1987,
-      A\&A, 188, 55
   
-   \bibitem{terlevich} Terlevich, R. 1992, in ASP Conf. Ser. 31, 
-      Relationships between Active Galactic Nuclei and Starburst Galaxies, 
-      ed. A. V. Filippenko, 13
+ \bibitem{flaw2} 
+Rahma Mahmood, Qusay H. Mahmoud.
+\textit{2011 CWE/SANS Top 25 Most Dangerous Software Errors}.
+Department of Electrical, Computer \& Software Engineering,University of Ontario Institute of Technology,Oshawa, ON, Canada.
 
-   \bibitem{yorke80a} Yorke, H. W. 1980a,
-      A\&A, 86, 286
+\bibitem{splint} Splint official page,\\\texttt{https://splint.org/}    
 
-   \bibitem{zheng} Zheng, W., Davidsen, A. F., Tytler, D. \& Kriss, G. A.
-      1997, preprint
+\bibitem{splint2} 
+Pedro pereira, Ulisses Costa.
+\textit{Splint the C code static checker}.
+Formal Methods in Software Engineering, May 28, 2009
 \end{thebibliography}
-
 \end{document}
 
