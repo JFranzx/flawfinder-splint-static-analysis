@@ -178,10 +178,10 @@ fragment.c:55:  [4] (buffer) strcpy:
   (CWE-120). Consider using snprintf, strcpy_s, or strlcpy (warning: strncpy
   easily misused).
 \end{lstlisting}
-On line 55 of the fragment, the \texttt{strcpy} function does not check for buffer overflows when copying to the destination.This vulnerability is assigned the \textit{CWE-120 weakness ID}, where \textit{CWE} stands for \textit{Common Weakness Enumaration}\cite{CWE}.\\
+On line 55 of the fragment, the \texttt{strcpy} function does not check for buffer overflows when copying to destination.This vulnerability is assigned the \textit{CWE-120 weakness ID}, where \textit{CWE} stands for \textit{Common Weakness Enumaration}\cite{CWE}.\\
 
 Portion of the fragment code, affected by the vulnerability:
-\begin{lstlisting}[style=c][numbers=left,firstnumber=51,linebackgroundcolor={\ifnum\value{lstnumber}=55\color{red}\fi}]
+\begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={\ifnum\value{lstnumber}=55\color{red}\fi}]
 int  main()
 {
 	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
@@ -202,7 +202,7 @@ strcpy does not specify the size of the destination array and this is very dange
 So Flawfinder suggests using other more secure functions like snprintf, strcpy\_s, strlcpy, strncpy.
 All these functions allow you to enter the size of the destination array, unlike strcpy.\\
 strncpy is poorly performing and less secure than the proposed functions.\\
-The problem with strncpy is that it does not add the terminator character and strings without the terminator character can cause \textit{segmentation fault} \cite{geeksstrcpy}.\\
+The problem with strncpy is that it if there is no null character among the first n character of the source, the string placed in destination will not be null-terminated.So strncpy() does not guarantee that the destination string will be NULL terminated.\\ Strings without the terminator character can cause \textit{segmentation fault} \cite{geeksstrcpy}.\\
 snprintf, on the other hand, always adds the NULL terminator character,but in some older systems, its implementation is subject to the \textit{buffer overflow}\cite{dangerc}.\\
 So the choice fell on the \textbf{strlcpy} function: safer and more performant \cite{dangerc} and always NULL-terminated,but not a standard C function.\\
 
@@ -217,21 +217,132 @@ How to use strlcpy function:\\
 \end{SpecialPar}
 \noindent
 Based on the previous information, this is the portion of the fragment where the vulnerability has been removed:
-\begin{lstlisting}[style=c][numbers=left,firstnumber=51,linebackgroundcolor={\ifnum\value{lstnumber}=55\color{green}\fi}]
+\begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={\ifnum\value{lstnumber}=55\color{green}\fi}]
 int  main()
 {
 	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
 	char *buffer = (char *)malloc(10 * sizeof(char));
-	strlcpy(buffer,foo,sizeof(buffer));
+	strlcpy(buffer,foo,sizeof(buffer)); //hit no.1
 	func1();
 	func3(sizeof(*foo));
 }
 \end{lstlisting}
 
 \break
-\textbf{Hits No.2,No.3} (Risk level 2)
+\textbf{Hits No.2,No.3,No.4} (Risk level 2), \textbf{No.5} (Risk level 1)
+
+\begin{lstlisting}[style=DOS][language=bash]
+fragment.c:9:  [2] (buffer) char:
+  Statically-sized arrays can be improperly restricted, leading to potential
+  overflows or other issues (CWE-119!/CWE-120). Perform bounds checking, use
+  functions that limit length, or ensure that the size is larger than the
+  maximum possible length.
+\end{lstlisting}
+
+\begin{lstlisting}[style=DOS][language=bash]
+fragment.c:16:  [2] (buffer) char:
+  Statically-sized arrays can be improperly restricted, leading to potential
+  overflows or other issues (CWE-119!/CWE-120). Perform bounds checking, use
+  functions that limit length, or ensure that the size is larger than the
+  maximum possible length.
+\end{lstlisting}
+These two hits describe the same problem:There are in the code,two statically-sized arrays that can be improperly restricted, leading to potential overflows or other issues.This vulnerability is assigned the \textit{CWE-119!/CWE-20 weakness ID}\cite{CWE}	\\
+Flawfinder suggests performing a bounds checking and other actions to avoid possible overflows.
+
+\begin{lstlisting}[style=DOS][language=bash]
+fragment.c:18:  [2] (buffer) strcat:
+  Does not check for buffer overflows when concatenating to destination
+  [MS-banned] (CWE-120). Consider using strcat_s, strncat, strlcat, or
+  snprintf (warning: strncat is easily misused). Risk is low because the
+  source is a constant string.
+\end{lstlisting}
+This hit is very similar to the hit number 1 related to the strcpy function.\\
+On line 18 of the fragment,the \texttt{strcat} function does not check for buffer overflows when concatenating to destination.This vulnerability is assigned the \textit{CWE-120 weakness ID}, where \textit{CWE} stands for \textit{Common Weakness Enumaration}\cite{CWE}.\\
+\begin{lstlisting}[style=DOS][language=bash]
+fragment.c:17:  [1] (buffer) strncpy:
+  Easily used incorrectly; doesn't always \0-terminate or check for invalid
+  pointers [MS-banned] (CWE-120).
+\end{lstlisting}
+Flawfinder reminds you that using the strcpy function can be dangerous.
+Here the same considerations made for the hit No.1 are valid: strncpy() does not guarantee that the destination string will be NULL terminated \cite{geeksstrcpy}
+\newpage
+This is the offending code:
+\begin{lstlisting}[style=c,numbers=left,firstnumber=7,linebackgroundcolor={
+\ifnum\value{lstnumber}=9\color{green}\fi
+\ifnum\value{lstnumber}=16\color{green}\fi
+\ifnum\value{lstnumber}=17\color{green}\fi
+\ifnum\value{lstnumber}=18\color{green}\fi}]
+void func1()
+{	
+	char buffer[1024]; // hit no.2
+  printf("Please enter your user id :");
+  fgets(buffer, 1024, stdin);
+ 
+  if (!isalpha(buffer[0]))
+  {
+
+     char errormsg[1044]; //hit no.3
+     strncpy(errormsg, buffer,1024); //hit.no.4
+     strcat(errormsg, " is not  a valid ID"); //hit no.5
+ 	}
+}
 
 
+\end{lstlisting}
+The hit no.2 is a \textbf{false positive}: the fgets function reads at most 1024 from the standard input and stores them into \texttt{buffer},\texttt{buffer} has been statically allocated with 1024 bytes which are enough to not cause any overflow.\\\\
+The hits no.3, no.4, no.5 are also a \textbf{false positive}: \texttt{errormsg} is statically allocated with enough bytes to contain the contents of the buffer and the constant string \textit{"is not  a valid ID"}.\\
+Furthermore strncpy guarantees the NULL terminator character, since fgets always adds the NULL terminator character.
+\\
+\\
+\textbf{Hits No.6,No.7} (Risk level 1)
+
+\begin{lstlisting}[style=DOS][language=bash]
+fragment.c:27:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+\end{lstlisting}
+
+\begin{lstlisting}[style=DOS][language=bash]
+fragment.c:29:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+
+\end{lstlisting}
+These hits concern the use of the read function.
+This vulnerability is assigned the \textit{CWE-120,CWE-20 weakness IDs}.\\
+In particular the weakness id 20 concerns an improper validation of the input.\cite{CWE}
+
+\begin{SpecialPar}
+\noindent
+CWE-20: Improper Input Validation\\
+Extended description: when software does not validate input properly, an attacker is able to craft the input in a form that is not expected by the rest of the application. This will lead to parts of the system receiving unintended input, which may result in altered control flow, arbitrary control of a resource, or arbitrary code execution \cite{CWE20}.
+\end{SpecialPar}
+\noindent
+This is the offending code:
+\begin{lstlisting}[style=c,numbers=left,firstnumber=23,linebackgroundcolor={
+\ifnum\value{lstnumber}=27\color{green}\fi
+\ifnum\value{lstnumber}=28\color{red}\fi
+\ifnum\value{lstnumber}=29\color{red}\fi}]
+void func2(int f2d)
+{
+	char *buf2;
+	size_t len;
+  read(f2d, &len, sizeof(len)); //hit no.6
+  buf2 = malloc(len+1); 
+  read(f2d, buf2, len); //hit no.7
+  buf2[len] = '\0';
+
+}
+
+
+
+\end{lstlisting}
+The hit no.5 is a \textbf{false positive}.\\
+The read function correctly reads sizeof(len) bytes from \texttt{f2d} and stores them in \texttt{len} which is large enough to accept them.\\
+The main problem is caused by the fact that there is no validation of the input: an attacker can supply a large value of \texttt{len} which 
+overflows to zero (\textbf{integer overflow}) on line 28,which will cause a \textbf{buffer overflow} in the next line, since the read function uses the original value of len.\\
+How is it possible?\\
+The variable \texttt{len} is of type \texttt{size\_t},
 
 
 \subsection{Splint output}
@@ -266,7 +377,8 @@ Weakness Enumeration)\cite{CWE}.
 
  \bibitem{CWE} CWE (Common
 Weakness Enumeration),\\\texttt{https://cwe.mitre.org/index.html}
-
+ \bibitem{CWE20} CWE (Common
+Weakness Enumeration),CWE-20,\\\texttt{https://cwe.mitre.org/data/definitions/20.html}
   
  \bibitem{flaw2} 
 Rahma Mahmood, Qusay H. Mahmoud.
