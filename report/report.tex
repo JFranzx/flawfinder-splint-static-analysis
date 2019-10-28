@@ -346,11 +346,31 @@ The main problem is caused by the fact that there is no validation of the input:
 overflows to zero (\textbf{integer overflow}) on line 28,which will cause a \textbf{buffer overflow} in the next line, since the read function uses the original value of len.\\
 How is it possible?\\
 The variable \texttt{len} is of type \texttt{size\_t}: size\_t is an unsigned integral data type,means that it can only take non-negative values.\\
-An attacker can supply the \textbf{maximum possible value} for size\_t,causing an interger overflow on line 28, indeed assuming that MAX\_VALUE represents the maximum value that size\_t can assume,we have that MAX\_VALUE +1 = 0 and that's exactly what happens on line 28 in this case.\\\\
-Based on the previous information, this is the portion of the fragment where the vulnerability has been removed:
+An attacker can supply the \textbf{maximum possible value} for size\_t,causing an interger overflow on line 28, indeed assuming that MAX\_VALUE represents the maximum value that size\_t can assume,we have that MAX\_VALUE +1 = 0 and that's exactly what happens on line 28 in this case.
+\newpage
+\noindent
+Based on the previous information, this is the portion of the fragment where the vulnerabilities has been removed:
+\begin{lstlisting}[style=c,numbers=left,firstnumber=23,linebackgroundcolor={
+\ifnum\value{lstnumber}=27\color{green}\fi
+\ifnum\value{lstnumber}=28\color{green}\fi
+\ifnum\value{lstnumber}=29\color{green}\fi
+\ifnum\value{lstnumber}=31\color{green}\fi}]
+void func2(int f2d)
+{
+	char *buf2;
+	size_t len;
+	size_t limit = 1024;
+  read(f2d, &len, sizeof(len)); //hit no.6
+	if(len > limit) return;   
+  buf2 = malloc(len+1); 
+  read(f2d, buf2, len); // hit.no.7
+  buf2[len] = '\0';
 
-
-
+}
+\end{lstlisting}
+To avoid the interger overflow and the consequent and possible buffer overflow and to resolve the vulnerability shown by the hit no.7, a variable called \texttt{limit} is used to limit the size of \texttt{len}.\\
+This way the \texttt{read} function can never cause buffer overflows, since the destination buffer is sufficiently large (len +1).\\
+Finally it is not even necessary to check that the variable \texttt{len} can assume negative values, since the type of data \texttt{size\_t} can only assume \textbf{non-negative values}.
 \newpage
 \textbf{Hits No.8,No.9} (Risk level 1)
 
@@ -386,9 +406,34 @@ void func3(int f3d)
   read(f3d, buf3,len);	//hit no.9
 }
 \end{lstlisting}
-
-
-
+The hit no.8 is a \textbf{false positive}.\\
+The \texttt{read} function correctly reads sizeof(len) bytes from \texttt{f2d} and stores them in \texttt{len} which is large enough to accept them.\\
+Also here the main problem is caused by an improper validation of the input.\\
+This function learns from the previous errors and tries to validate the input by checking that \texttt{len} value is not greater than a set value(avoid integer overflow).\\
+In this case the variable \texttt{len} is not of type \texttt{size\_t}, but of type \texttt{int} that represents \emph{signed} integers.\\
+An attacker can supply a negative value for \texttt{len},that  will be converted to a large positive value when it gets cast to an unsigned integer on line 46 (hit no.9).\\
+\newpage
+\noindent
+Based on the previous information, this is the portion of the fragment where the vulnerabilities has been removed:
+\begin{lstlisting}[style=c,numbers=left,firstnumber=35,linebackgroundcolor={
+\ifnum\value{lstnumber}=39\color{green}\fi
+\ifnum\value{lstnumber}=40\color{green}\fi
+\ifnum\value{lstnumber}=46\color{green}\fi}]
+void func3(int f3d)
+{
+  char *buf3;
+  int len;
+  read(f3d, &len, sizeof(len));
+  if (len < 0 || len > 8000) 
+  { 
+  	perror("too large length");
+  	return; 
+  }
+  buf3 = malloc(len+1);
+  read(f3d, buf3,len);
+  buf3[len] = '\0';        
+}
+\end{lstlisting}
 
 \subsection{Splint output}
 
