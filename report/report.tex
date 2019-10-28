@@ -32,8 +32,7 @@
     prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
     breakatwhitespace=false,
     aboveskip={1.5\baselineskip},
-    columns=fixed,
-     extendedchars=true,
+    columns=fixed,    
     frame=single
 }
 
@@ -179,8 +178,9 @@ fragment.c:55:  [4] (buffer) strcpy:
   easily misused).
 \end{lstlisting}
 On line 55 of the fragment, the \texttt{strcpy} function does not check for buffer overflows when copying to destination.This vulnerability is assigned the \textit{CWE-120 weakness ID}, where \textit{CWE} stands for \textit{Common Weakness Enumaration}\cite{CWE}.\\
+\noindent
 
-Portion of the fragment code, affected by the vulnerability:
+Portion of the fragment code, affected by the possible vulnerability:
 \begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={\ifnum\value{lstnumber}=55\color{red}\fi}]
 int  main()
 {
@@ -266,7 +266,9 @@ fragment.c:17:  [1] (buffer) strncpy:
 Flawfinder reminds you that using the strcpy function can be dangerous.
 Here the same considerations made for the hit No.1 are valid: strncpy() does not guarantee that the destination string will be NULL terminated \cite{geeksstrcpy}
 \newpage
-This is the offending code:
+\noindent
+
+Portion of the fragment code, affected by the possible vulnerabilities:
 \begin{lstlisting}[style=c,numbers=left,firstnumber=7,linebackgroundcolor={
 \ifnum\value{lstnumber}=9\color{green}\fi
 \ifnum\value{lstnumber}=16\color{green}\fi
@@ -317,8 +319,9 @@ In particular the weakness id 20 concerns an improper validation of the input.\c
 CWE-20: Improper Input Validation\\
 Extended description: when software does not validate input properly, an attacker is able to craft the input in a form that is not expected by the rest of the application. This will lead to parts of the system receiving unintended input, which may result in altered control flow, arbitrary control of a resource, or arbitrary code execution \cite{CWE20}.
 \end{SpecialPar}
+
 \noindent
-This is the offending code:
+Portion of the fragment code, affected by the possibile vulnerabilities:
 \begin{lstlisting}[style=c,numbers=left,firstnumber=23,linebackgroundcolor={
 \ifnum\value{lstnumber}=27\color{green}\fi
 \ifnum\value{lstnumber}=28\color{red}\fi
@@ -337,28 +340,63 @@ void func2(int f2d)
 
 
 \end{lstlisting}
-The hit no.5 is a \textbf{false positive}.\\
+The hit no.6 is a \textbf{false positive}.\\
 The read function correctly reads sizeof(len) bytes from \texttt{f2d} and stores them in \texttt{len} which is large enough to accept them.\\
 The main problem is caused by the fact that there is no validation of the input: an attacker can supply a large value of \texttt{len} which 
 overflows to zero (\textbf{integer overflow}) on line 28,which will cause a \textbf{buffer overflow} in the next line, since the read function uses the original value of len.\\
 How is it possible?\\
 The variable \texttt{len} is of type \texttt{size\_t}: size\_t is an unsigned integral data type,means that it can only take non-negative values.\\
-An attacker can supply the \textbf{maximum possible value} for size\_t,causing an interger overflow on line 28, indeed assuming that MAX\_VALUE represents the maximum value that size\_t can assume,we have that MAX\_VALUE +1 = 0 and that's exactly what happens on line 28 in this case.
-Then the malloc function on line 28 allocates a block of 0 bytes of memory, the function read on line 29 tries to read len=MAX\_VALUE bytes from f2d and store them into buf2. 
-but buf2 has been allocated 0 bytes, so there will be a buffer overflow
+An attacker can supply the \textbf{maximum possible value} for size\_t,causing an interger overflow on line 28, indeed assuming that MAX\_VALUE represents the maximum value that size\_t can assume,we have that MAX\_VALUE +1 = 0 and that's exactly what happens on line 28 in this case.\\\\
+Based on the previous information, this is the portion of the fragment where the vulnerability has been removed:
+
+
+
+\newpage
+\textbf{Hits No.8,No.9} (Risk level 1)
+
+\begin{lstlisting}[style=DOS][language=bash]
+fragment.c:39:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+\end{lstlisting}
+
+\begin{lstlisting}[style=DOS][language=bash]
+fragment.c:46:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+\end{lstlisting}
+Like the previous hits, the latter also concern the use of the read function,so the considerations concerning the CWE-20 weakness ID also apply in this case.\\
+
+\noindent
+Portion of the fragment code, affected by the possibile vulnerabilities:
+\begin{lstlisting}[style=c,numbers=left,firstnumber=35,linebackgroundcolor={
+\ifnum\value{lstnumber}=39\color{green}\fi
+\ifnum\value{lstnumber}=46\color{red}\fi}]
+void func3(int f3d)
+{
+	char *buf3;
+  int len;
+  read(f3d, &len, sizeof(len)); // hit no.8
+  if (len > 8000) 
+  { 
+  	perror("too large length");
+  	return; 
+	}
+  buf3 = malloc(len);
+  read(f3d, buf3,len);	//hit no.9
+}
+\end{lstlisting}
+
 
 
 
 \subsection{Splint output}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent elementum aliquam massa, eget vestibulum arcu porta lacinia. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nunc et turpis dignissim, viverra arcu id, eleifend risus. Nulla facilisi. Sed venenatis placerat nibh, vel vehicula mi molestie a. Donec porttitor pharetra tortor id sodales. In ultricies, ex quis aliquet laoreet, sapien est pulvinar elit, vitae gravida metus lorem et mi. Nulla lacus ante, feugiat a diam at, sodales rutrum sapien. Nam sit amet odio nisl. Sed in auctor metus. Fusce viverra aliquet metus a condimentum.
 
-\newpage
 \section{Corrected version of the fragment}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent elementum aliquam massa, eget vestibulum arcu porta lacinia. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nunc et turpis dignissim, viverra arcu id, eleifend risus. Nulla facilisi. Sed venenatis placerat nibh, vel vehicula mi molestie a. Donec porttitor pharetra tortor id sodales. In ultricies, ex quis aliquet laoreet, sapien est pulvinar elit, vitae gravida metus lorem et mi. Nulla lacus ante, feugiat a diam at, sodales rutrum sapien. Nam sit amet odio nisl. Sed in auctor metus. Fusce viverra aliquet metus a condimentum.
 
-\newpage
+
+
 \section{Conclusion}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent elementum aliquam massa, eget vestibulum arcu porta lacinia. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nunc et turpis dignissim, viverra arcu id, eleifend risus. Nulla facilisi. Sed venenatis placerat nibh, vel vehicula mi molestie a. Donec porttitor pharetra tortor id sodales. In ultricies, ex quis aliquet laoreet, sapien est pulvinar elit, vitae gravida metus lorem et mi. Nulla lacus ante, feugiat a diam at, sodales rutrum sapien. Nam sit amet odio nisl. Sed in auctor metus. Fusce viverra aliquet metus a condimentum.
 
 
 
