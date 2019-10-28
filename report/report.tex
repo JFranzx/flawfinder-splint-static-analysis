@@ -14,7 +14,9 @@
     backgroundcolor=\color{black},
     basicstyle=\scriptsize\color{white}\ttfamily
 }
-\lstset{
+
+\lstdefinestyle{c}
+{
     language=C,
     keywordstyle=\bfseries\ttfamily\color[rgb]{0,0,1},
     identifierstyle=\ttfamily,
@@ -98,6 +100,8 @@ For simplicity, the fragment has been modified into a C code fragment with a \te
 \end{SpecialPar}
 
 
+
+
 \subsection{Flawfinder output}
 
 Running the program with this command:\begin{lstlisting}[style=DOS][language=bash]
@@ -166,7 +170,7 @@ In the second part instead shows the number of these hits, the number of hits th
 Furthermore, Flawfinder reminds that not all of these hits must necessarily represent vulnerabilities, stating that some of them may be false positives: find out what, programmer's job is.\\
 So the fragment has nine hits,let's describe them one by one and try to understand if they actually represent a vulnerability or a false positive.\\
 In the first case, it is shown how to solve the vulnerability to obtain a more secure code.\\
-\\
+\newpage
 \textbf{Hit No.1} (Risk level 4)
 \begin{lstlisting}[style=DOS][language=bash]
 fragment.c:55:  [4] (buffer) strcpy:
@@ -175,6 +179,18 @@ fragment.c:55:  [4] (buffer) strcpy:
   easily misused).
 \end{lstlisting}
 On line 55 of the fragment, the \texttt{strcpy} function does not check for buffer overflows when copying to the destination.This vulnerability is assigned the \textit{CWE-120 weakness ID}, where \textit{CWE} stands for \textit{Common Weakness Enumaration}\cite{CWE}.\\
+
+Portion of the fragment code, affected by the vulnerability:
+\begin{lstlisting}[style=c][numbers=left,firstnumber=51,linebackgroundcolor={\ifnum\value{lstnumber}=55\color{red}\fi}]
+int  main()
+{
+	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
+	char *buffer = (char *)malloc(10 * sizeof(char));
+	strcpy(buffer, foo);
+	func1();
+	func3(sizeof(*foo));
+}
+\end{lstlisting}
 Looking at the documentation related to the strcpy function\cite{strcpy}, it is possible to see how this function is not safe:\\
 \begin{SpecialPar}
 \noindent
@@ -199,31 +215,22 @@ How to use strlcpy function:\\
  2) add the header: \texttt{\#include <bsd/string.h>}\\
  3) compile with \texttt{-lbsd} flag\\
 \end{SpecialPar}
-
-
-\begin{lstlisting}[language=c++]
+\noindent
+Based on the previous information, this is the portion of the fragment where the vulnerability has been removed:
+\begin{lstlisting}[style=c][numbers=left,firstnumber=51,linebackgroundcolor={\ifnum\value{lstnumber}=55\color{green}\fi}]
 int  main()
 {
 	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
 	char *buffer = (char *)malloc(10 * sizeof(char));
-	strcpy(buffer, foo);
+	strlcpy(buffer,foo,sizeof(buffer));
 	func1();
 	func3(sizeof(*foo));
 }
 \end{lstlisting}
 
+\break
+\textbf{Hits No.2,No.3} (Risk level 2)
 
-\centering
-\begin{lstlisting}[numbers=left,firstnumber=51,linebackgroundcolor={\ifnum\value{lstnumber}=55\color{red}\fi}]
-int  main()
-{
-	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
-	char *buffer = (char *)malloc(10 * sizeof(char));
-	strcpy(buffer, foo);
-	func1();
-	func3(sizeof(*foo));
-}
-\end{lstlisting}
 
 
 
