@@ -5,6 +5,7 @@
 \usepackage{graphicx}
 \usepackage[english]{babel}
 \usepackage[latin1]{inputenc}
+\usepackage{lstlinebgrd}
 \usepackage{babel,xcolor,framed,marginnote,blindtext}
 \usepackage{listings}
 \colorlet{shadecolor}{blue!10}
@@ -13,6 +14,27 @@
     backgroundcolor=\color{black},
     basicstyle=\scriptsize\color{white}\ttfamily
 }
+\lstset{
+    language=C,
+    keywordstyle=\bfseries\ttfamily\color[rgb]{0,0,1},
+    identifierstyle=\ttfamily,
+    commentstyle=\color[rgb]{0.133,0.545,0.133},
+    stringstyle=\ttfamily\color[rgb]{0.627,0.126,0.941},
+    showstringspaces=false,
+    basicstyle=\small,
+    numberstyle=\footnotesize,
+    stepnumber=1,
+    numbersep=10pt,
+    tabsize=2,
+    breaklines=true,
+    prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+    breakatwhitespace=false,
+    aboveskip={1.5\baselineskip},
+    columns=fixed,
+     extendedchars=true,
+    frame=single
+}
+
 \newenvironment{SpecialPar}
   {\begin{shaded}}
   {\end{shaded}}
@@ -68,6 +90,7 @@ Splint is a very light static analysis tool, it helps to improve the quality of 
 \section{Output description}
 This section describes the outputs of the respective tools and shows how starting from these outputs, it is possible to improve the code and free it from vulnerabilities and errors that can lead to serious problems.
 \begin{SpecialPar}
+\noindent
 As mentioned in the previous section, one of the peculiarities of Flawfinder is that it can perform analysis even on fragments of C / C ++ code that cannot be compiled.
 The fragment available for this analysis is a fragment of text in which there is a C code.
 Splint does not have the same peculiarity as Flawfinder and causes problems with files that do not have a C extension and are not written so that they can be compiled.\\
@@ -154,18 +177,53 @@ fragment.c:55:  [4] (buffer) strcpy:
 On line 55 of the fragment, the \texttt{strcpy} function does not check for buffer overflows when copying to the destination.This vulnerability is assigned the \textit{CWE-120 weakness ID}, where \textit{CWE} stands for \textit{Common Weakness Enumaration}\cite{CWE}.\\
 Looking at the documentation related to the strcpy function\cite{strcpy}, it is possible to see how this function is not safe:\\
 \begin{SpecialPar}
+\noindent
 \texttt{char * strcpy ( char * destination, const char * source );}
 Copies the C string pointed by source into the array 		pointed by destination, including the terminating null character (and stopping at that point).
 \end{SpecialPar}
-strcpy does not specify the size of the destination array and this is very dangerous because if the destination array is not large enough to accommodate the source string, this will cause a buffer overflow.\\
+\noindent
+strcpy does not specify the size of the destination array and this is very dangerous because if the destination array is not large enough to accommodate the source string, this will cause a \textit{buffer overflow}.\\
 So Flawfinder suggests using other more secure functions like snprintf, strcpy\_s, strlcpy, strncpy.
+All these functions allow you to enter the size of the destination array, unlike strcpy.\\
 strncpy is poorly performing and less secure than the proposed functions.\\
-The problem with strncpy is that it does not add the terminator character and strings without the terminator character can cause segmentation fault \cite{geeksstrcpy}.\\
-snprintf, on the other hand, always adds the NULL terminator character,but in some older systems, its implementation is subject to the buffer overflow\cite{dangerc}.
+The problem with strncpy is that it does not add the terminator character and strings without the terminator character can cause \textit{segmentation fault} \cite{geeksstrcpy}.\\
+snprintf, on the other hand, always adds the NULL terminator character,but in some older systems, its implementation is subject to the \textit{buffer overflow}\cite{dangerc}.\\
+So the choice fell on the \textbf{strlcpy} function: safer and more performant \cite{dangerc} and always NULL-terminated,but not a standard C function.\\
 
 
+\begin{SpecialPar}
+
+\noindent
+How to use strlcpy function:\\
+ 1) install the library: \texttt{sudo apt-get install libbsd-dev}\\
+ 2) add the header: \texttt{\#include <bsd/string.h>}\\
+ 3) compile with \texttt{-lbsd} flag\\
+\end{SpecialPar}
 
 
+\begin{lstlisting}[language=c++]
+int  main()
+{
+	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
+	char *buffer = (char *)malloc(10 * sizeof(char));
+	strcpy(buffer, foo);
+	func1();
+	func3(sizeof(*foo));
+}
+\end{lstlisting}
+
+
+\centering
+\begin{lstlisting}[numbers=left,firstnumber=51,linebackgroundcolor={\ifnum\value{lstnumber}=55\color{red}\fi}]
+int  main()
+{
+	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
+	char *buffer = (char *)malloc(10 * sizeof(char));
+	strcpy(buffer, foo);
+	func1();
+	func3(sizeof(*foo));
+}
+\end{lstlisting}
 
 
 
