@@ -342,7 +342,9 @@ The read function correctly reads sizeof(len) bytes from \texttt{f2d} and stores
 The main problem is caused by the fact that there is no validation of the input: an attacker can supply a large value of \texttt{len} which 
 overflows to zero (\textbf{integer overflow}) on line 28,which will cause a \textbf{buffer overflow} in the next line, since the read function uses the original value of len.\\
 How is it possible?\\
-The variable \texttt{len} is of type \texttt{size\_t},
+The variable \texttt{len} is of type \texttt{size\_t}: size\_t is an unsigned integral data type,means that it can only take non-negative values.\\
+An attacker can supply the \textbf{maximum possible value} for size\_t,causing an interger overflow on line 28, indeed assuming that MAX\_VALUE represents the maximum value that size\_t can assume,we have that MAX\_VALUE +1 = 0 and that's exactly what happens on line 28 in this case.
+
 
 
 \subsection{Splint output}
