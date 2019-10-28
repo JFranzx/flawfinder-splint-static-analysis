@@ -344,6 +344,8 @@ overflows to zero (\textbf{integer overflow}) on line 28,which will cause a \tex
 How is it possible?\\
 The variable \texttt{len} is of type \texttt{size\_t}: size\_t is an unsigned integral data type,means that it can only take non-negative values.\\
 An attacker can supply the \textbf{maximum possible value} for size\_t,causing an interger overflow on line 28, indeed assuming that MAX\_VALUE represents the maximum value that size\_t can assume,we have that MAX\_VALUE +1 = 0 and that's exactly what happens on line 28 in this case.
+Then the malloc function on line 28 allocates a block of 0 bytes of memory, the function read on line 29 tries to read len=MAX\_VALUE bytes from f2d and store them into buf2. 
+but buf2 has been allocated 0 bytes, so there will be a buffer overflow
 
 
 
