@@ -411,7 +411,7 @@ The \texttt{read} function correctly reads sizeof(len) bytes from \texttt{f2d} a
 Also here the main problem is caused by an improper validation of the input.\\
 This function learns from the previous errors and tries to validate the input by checking that \texttt{len} value is not greater than a set value(avoid integer overflow).\\
 In this case the variable \texttt{len} is not of type \texttt{size\_t}, but of type \texttt{int} that represents \emph{signed} integers.\\
-An attacker can supply a negative value for \texttt{len},that  will be converted to a large positive value when it gets cast to an unsigned integer on line 46 (hit no.9).\\
+An attacker can supply a negative value for \texttt{len},that  will be converted to a large positive value when it gets cast to an unsigned integer on line 46 (hit no.9),causing a buffer overflow.\\
 \newpage
 \noindent
 Based on the previous information, this is the portion of the fragment where the vulnerabilities has been removed:
@@ -434,9 +434,88 @@ void func3(int f3d)
   buf3[len] = '\0';        
 }
 \end{lstlisting}
-
+A further check on the non-negativity of \texttt{len} is necessary to solve the vulnerability shown by hit no.9
+\newpage
 \subsection{Splint output}
 
+Running the program with this command:\begin{lstlisting}[style=DOS][language=bash]
+  $ splint fragment.c
+\end{lstlisting}
+
+You get the following result:
+\begin{lstlisting}[style=DOS][language=bash]
+Splint 3.1.2 --- 20 Feb 2018
+
+fragment.c:2: Include file <unistd.h> matches the name of a POSIX library, but
+    the POSIX library is not being used.  Consider using +posixlib or
+    +posixstrictlib to select the POSIX library, or -warnposix to suppress this
+    message.
+  Header name matches a POSIX header, but the POSIX library is not selected.
+  (Use -warnposixheaders to inhibit warning)
+fragment.c: (in function func1)
+fragment.c:11:3: Return value (type char *) ignored: fgets(buffer, 10...
+  Result returned by function call is not used. If this is intended, can cast
+  result to (void) to eliminate message. (Use -retvalother to inhibit warning)
+fragment.c: (in function func2)
+fragment.c:27:13: Passed storage &len not completely defined:
+                     read (..., &len, ...)
+  Storage derivable from a parameter, return value or global is not defined.
+  Use /*@out@*/ to denote passed or returned storage which need not be defined.
+  (Use -compdef to inhibit warning)
+fragment.c:27:3: Return value (type ssize_t) ignored: read(f2d, &len, ...
+fragment.c:29:13: Possibly null storage buf2 passed as non-null param:
+                     read (..., buf2, ...)
+  A possibly null pointer is passed as a parameter corresponding to a formal
+  parameter with no /*@null@*/ annotation.  If NULL may be used for this
+  parameter, add a /*@null@*/ annotation to the function parameter declaration.
+  (Use -nullpass to inhibit warning)
+   fragment.c:28:10: Storage buf2 may become null
+fragment.c:29:13: Passed storage buf2 not completely defined (*buf2 is
+                     undefined): read (..., buf2, ...)
+   fragment.c:28:3: Storage *buf2 allocated
+fragment.c:29:3: Return value (type ssize_t) ignored: read(f2d, buf2, len)
+fragment.c:32:2: Fresh storage buf2 not released before return
+  A memory leak has been detected. Storage allocated locally is not released
+  before the last reference to it is lost. (Use -mustfreefresh to inhibit
+  warning)
+   fragment.c:28:3: Fresh storage buf2 created
+fragment.c: (in function func3)
+fragment.c:39:13: Passed storage &len not completely defined:
+                     read (..., &len, ...)
+fragment.c:39:3: Return value (type ssize_t) ignored: read(f3d, &len, ...
+fragment.c:45:17: Function malloc expects arg 1 to be size_t gets int: len
+  To allow arbitrary integral types to match any integral type, use
+  +matchanyintegral.
+fragment.c:46:18: Function read expects arg 3 to be size_t gets int: len
+fragment.c:46:13: Possibly null storage buf3 passed as non-null param:
+                     read (..., buf3, ...)
+   fragment.c:45:10: Storage buf3 may become null
+fragment.c:46:13: Passed storage buf3 not completely defined (*buf3 is
+                     undefined): read (..., buf3, ...)
+   fragment.c:45:3: Storage *buf3 allocated
+fragment.c:46:3: Return value (type ssize_t) ignored: read(f3d, buf3, len)
+fragment.c:47:2: Fresh storage buf3 not released before return
+   fragment.c:45:3: Fresh storage buf3 created
+fragment.c: (in function main)
+fragment.c:55:9: Possibly null storage buffer passed as non-null param:
+                    strcpy (buffer, ...)
+   fragment.c:54:17: Storage buffer may become null
+fragment.c:57:14: Function func3 expects arg 1 to be int gets size_t:
+                     sizeof((*foo))
+fragment.c:58:2: Path with no return in function declared to return int
+  There is a path through a function declared to return a value on which there
+  is no return statement. This means the execution may fall through without
+  returning a meaningful result to the caller. (Use -noret to inhibit warning)
+fragment.c:58:2: Fresh storage buffer not released before return
+   fragment.c:54:51: Fresh storage buffer created
+fragment.c:7:6: Function exported but not used outside fragment: func1
+  A declaration is exported, but not used outside this module. Declaration can
+  use static qualifier. (Use -exportlocal to inhibit warning)
+   fragment.c:20:1: Definition of func1
+fragment.c:35:6: Function exported but not used outside fragment: func3
+   fragment.c:47:1: Definition of func3
+
+\end{lstlisting}
 \section{Corrected version of the fragment}
 
 
