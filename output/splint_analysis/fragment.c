@@ -48,11 +48,11 @@ void func3(int f3d)
 
 
 
-int  main()
+void  main()
 {
 	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
 	char *buffer = (char *)malloc(10 * sizeof(char));
-	strcpy(buffer, foo);
+	strcpy(buffer, foo);	
 	func1();
 	func3(sizeof(*foo));
 }
