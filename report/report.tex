@@ -494,9 +494,9 @@ A memory leak is an unintentional form of memory consumption whereby the develop
 \newpage
 \noindent
 Based on the previous information, this is the portion of the fragment where \textbf{these} vulnerabilities has been removed:
-\begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={
-\ifnum\value{lstnumber}=56\color{green}\fi
-\ifnum\value{lstnumber}=66\color{green}\fi}]
+\begin{lstlisting}[style=c,numbers=left,firstnumber=86,linebackgroundcolor={
+\ifnum\value{lstnumber}=91\color{green}\fi
+\ifnum\value{lstnumber}=101\color{green}\fi}]
 int  main()
 {
 	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
@@ -528,8 +528,13 @@ fragment.c:11:3: Return value (type char *) ignored: fgets(buffer, 10...
   Result returned by function call is not used. If this is intended, can cast
   result to (void) to eliminate message. (Use -retvalother to inhibit warning)
 \end{lstlisting}
-
-Portion of the fragment code, affected by the possibile vulnerabilities:
+The return value of the fgets function is ignored.
+Ignoring the return value of functions is a potential vulnerability.
+The \textit{CWE-252 weakness ID} \cite{CWE252} 
+describes in detail what could happen to a program in which the return values of the functions are not checked.\\
+If an attacker can force the function to fail or otherwise return a value that is not expected, then the subsequent program logic could lead to a vulnerability, because the software is not in a state that the programmer assumes.\\
+So it's definitely a good practice to always do these kind of checks.\\
+Portion of the fragment code, affected by the weakness:
 \begin{lstlisting}[style=c,numbers=left,firstnumber=7,linebackgroundcolor={
 \ifnum\value{lstnumber}=11\color{red}\fi
 }]
@@ -550,7 +555,7 @@ void func1()
 \end{lstlisting}
 
 \noindent
-Based on the previous information, this is the portion of the fragment where \textbf{these} vulnerabilities has been removed:
+Based on the previous information, this is the portion of the fragment where \textbf{the} weakness has been removed:
 \begin{lstlisting}[style=c,numbers=left,firstnumber=7,linebackgroundcolor={
 \ifnum\value{lstnumber}=11\color{green}\fi}]
 void func1()
@@ -567,53 +572,33 @@ void func1()
      strcat(errormsg, " is not  a valid ID");
  	}
  }
+ else
+ {
+	/* error handling */ 
+ }
 }
 
 
 \end{lstlisting}
-aaaaaa\\\\\\
+Now the return value of the fgets function is checked and in case of errors it is possible to handle the error.
 
 
 \noindent
 \textbf{func2()}\\
-\begin{lstlisting}[style=DOS][language=bash]
-fragment.c:27:13: Passed storage &len not completely defined:
-                     read (..., &len, ...)
-  Storage derivable from a parameter, return value or global is not defined.
-  Use /*@out@*/ to denote passed or returned storage which need not be defined.
-  (Use -compdef to inhibit warning)
-\end{lstlisting}
 
 \begin{lstlisting}[style=DOS][language=bash]
 fragment.c:27:3: Return value (type ssize_t) ignored: read(f2d, &len, ...
 \end{lstlisting}
 
 
-\begin{lstlisting}[style=DOS][language=bash]
-fragment.c:29:13: Possibly null storage buf2 passed as non-null param:
-                     read (..., buf2, ...)
-  A possibly null pointer is passed as a parameter corresponding to a formal
-  parameter with no /*@null@*/ annotation.  If NULL may be used for this
-  parameter, add a /*@null@*/ annotation to the function parameter declaration.
-  (Use -nullpass to inhibit warning)
-\end{lstlisting}
-
-\begin{lstlisting}[style=DOS][language=bash]
- fragment.c:28:10: Storage buf2 may become null
-\end{lstlisting}
-
-
-\begin{lstlisting}[style=DOS][language=bash]
-fragment.c:29:13: Passed storage buf2 not completely defined (*buf2 is
-                     undefined): read (..., buf2, ...)
-\end{lstlisting}
-
-\begin{lstlisting}[style=DOS][language=bash]
-fragment.c:28:3: Storage *buf2 allocated
-\end{lstlisting}
 
 \begin{lstlisting}[style=DOS][language=bash]
 fragment.c:29:3: Return value (type ssize_t) ignored: read(f2d, buf2, len)
+
+\end{lstlisting}
+These warnings are the same warning already analyzed and solved for the func1 function, the one with CWE-252 wakness id. \cite{CWE252}.
+\begin{lstlisting}[style=DOS][language=bash]
+ fragment.c:28:10: Storage buf2 may become null
 \end{lstlisting}
 
 \begin{lstlisting}[style=DOS][language=bash]
@@ -622,18 +607,14 @@ fragment.c:32:2: Fresh storage buf2 not released before return
   before the last reference to it is lost. (Use -mustfreefresh to inhibit
   warning)
 \end{lstlisting}
-
-\begin{lstlisting}[style=DOS][language=bash]
-   fragment.c:28:3: Fresh storage buf2 created
-fragment.c: (in function func3)
-\end{lstlisting}
-
-
+These two are the same warnings already analyzed and solved for the \texttt{main()} function, those with \textit{CWE-476} \cite{CWE476}, \textit{CWE-772} \cite{CWE772} \textit{waekness ids}, respectively.
+\noindent
 Portion of the fragment code, affected by the possibile vulnerabilities:
-\begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={
-\ifnum\value{lstnumber}=54\color{red}\fi
-\ifnum\value{lstnumber}=55\color{red}\fi
-\ifnum\value{lstnumber}=58\color{red}\fi
+\begin{lstlisting}[style=c,numbers=left,firstnumber=23,linebackgroundcolor={
+\ifnum\value{lstnumber}=27\color{red}\fi
+\ifnum\value{lstnumber}=29\color{red}\fi
+\ifnum\value{lstnumber}=32\color{red}\fi
+\ifnum\value{lstnumber}=28\color{red}\fi
 }]
 void func2(int f2d)
 {
@@ -648,33 +629,40 @@ void func2(int f2d)
 
 \end{lstlisting}
 
+\newpage
 \noindent
 Based on the previous information, this is the portion of the fragment where \textbf{these} vulnerabilities has been removed:
-\begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={
-\ifnum\value{lstnumber}=56\color{green}\fi
-\ifnum\value{lstnumber}=66\color{green}\fi}]
-static void func2(int f2d)
+\begin{lstlisting}[style=c,numbers=left,firstnumber=23,linebackgroundcolor={
+\ifnum\value{lstnumber}=28\color{green}\fi
+\ifnum\value{lstnumber}=31\color{green}\fi
+\ifnum\value{lstnumber}=36\color{green}\fi
+\ifnum\value{lstnumber}=43\color{green}\fi
+\ifnum\value{lstnumber}=52\color{green}\fi
+}]
+void func2(int f2d)
 {
 	char *buf2 = NULL;;
 	size_t len = 0;
-        ssize_t ret = 0;
-        if((ret = read(f2d, &len, sizeof(len)))> 0){
+  ssize_t ret = 0;
+  if((ret = read(f2d, &len, sizeof(len)))> 0)
+  {
   		buf2 = calloc(len+1,sizeof(char));
-		if(buf2 == NULL)
-		{
-			/*error handling */
-			return;
-		} 
-  		if((ret = read(f2d,buf2, len))>0){ 
-  		  buf2[ret] = '\0';
+			if(buf2 == NULL)
+			{	
+				/*error handling */
+				return;
+			} 
+  		if((ret = read(f2d,buf2, len))>0)
+  		{ 
+  			buf2[ret] = '\0';
 		  
-		}
-		else
-		{
-		  free(buf2);
-		  /*error handling */
-		  return;
-		}
+			}
+			else
+			{
+		 		 free(buf2);
+		  		/*error handling */
+		 		 return;
+			}
 	}
 	else
 	{
@@ -687,67 +675,32 @@ static void func2(int f2d)
 
 \end{lstlisting}
 
-
+\newpage
 \noindent
 \textbf{func3()}\\
 
    
-\begin{lstlisting}[style=DOS][language=bash]
-fragment.c:39:13: Passed storage &len not completely defined:
-                     read (..., &len, ...)
-\end{lstlisting}
-
 
 \begin{lstlisting}[style=DOS][language=bash]
 fragment.c:39:3: Return value (type ssize_t) ignored: read(f3d, &len, ...
 \end{lstlisting}
 
-\begin{lstlisting}[style=DOS][language=bash]
-fragment.c:45:17: Function malloc expects arg 1 to be size_t gets int: len
-  To allow arbitrary integral types to match any integral type, use
-  +matchanyintegral.
-\end{lstlisting}
 
-\begin{lstlisting}[style=DOS][language=bash]
-fragment.c:46:18: Function read expects arg 3 to be size_t gets int: len
-\end{lstlisting}
-
-
-\begin{lstlisting}[style=DOS][language=bash]
-fragment.c:46:13: Possibly null storage buf3 passed as non-null param:
-                     read (..., buf3, ...)
-\end{lstlisting}
-
-\begin{lstlisting}[style=DOS][language=bash]
- fragment.c:45:10: Storage buf3 may become null
-\end{lstlisting}
-
-\begin{lstlisting}[style=DOS][language=bash]
-fragment.c:46:13: Passed storage buf3 not completely defined (*buf3 is
-                     undefined): read (..., buf3, ...)
-\end{lstlisting}
-
-\begin{lstlisting}[style=DOS][language=bash]
- fragment.c:45:3: Storage *buf3 allocated
-\end{lstlisting}
 
 \begin{lstlisting}[style=DOS][language=bash]
 fragment.c:46:3: Return value (type ssize_t) ignored: read(f3d, buf3, len)
 \end{lstlisting}
 
+
 \begin{lstlisting}[style=DOS][language=bash]
 fragment.c:47:2: Fresh storage buf3 not released before return
 \end{lstlisting}
-\begin{lstlisting}[style=DOS][language=bash]
-  fragment.c:45:3: Fresh storage buf3 created
-\end{lstlisting}
-
-
+These warnings represent weaknesses / vulnerabilities already encountered with analyzing the previous functions
 Portion of the fragment code, affected by the possibile vulnerabilities:
 \begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={
-\ifnum\value{lstnumber}=54\color{red}\fi
 \ifnum\value{lstnumber}=55\color{red}\fi
-\ifnum\value{lstnumber}=58\color{red}\fi
+\ifnum\value{lstnumber}=61\color{red}\fi
+\ifnum\value{lstnumber}=62\color{red}\fi
 }]
 void func3(int f3d)
 {
@@ -767,10 +720,13 @@ void func3(int f3d)
 
 \newpage
 \noindent
-Based on the previous information, this is the portion of the fragment where \textbf{these} vulnerabilities has been removed:
+Based on the previous information, this is the portion of the fragment where \textbf{these} vulnerabilities and weaknesses have been removed:
 \begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={
-\ifnum\value{lstnumber}=56\color{green}\fi
-\ifnum\value{lstnumber}=66\color{green}\fi}]
+\ifnum\value{lstnumber}=58\color{green}\fi
+\ifnum\value{lstnumber}=68\color{green}\fi
+\ifnum\value{lstnumber}=73\color{green}\fi
+\ifnum\value{lstnumber}=76\color{green}\fi
+\ifnum\value{lstnumber}=79\color{green}\fi}]
 static void func3(int f3d)
 {
 	
@@ -805,9 +761,14 @@ char *buf3;
 
 \end{lstlisting}
 
-
+\begin{SpecialPar}
+\noindent
+\texttt{note}: Not all warnings have been taken into consideration in this splint output analysis.\\
+Many of Splint's warnings do not represent a real vulnerability, but suggestions for obtaining a higher quality and more reliable code.\\
+Despite this, most of the warnings have been analyzed and solved in order to obtain a more reliable and error-free code.
+\end{SpecialPar}
 \section{Corrected version of the fragment}
-\newpage
+This section shows the fragment of code considered "safe", obtained at the end of the analysis phase using tools such as Flawfinder and Splint.	\\
 \begin{lstlisting}[style=c, basicstyle=\scriptsize,numbers=left,firstnumber=1]
 #include <stdio.h>
 #include <ctype.h>
@@ -827,12 +788,17 @@ ssize_t func1()
     	 	char errormsg[1044];
      		strlcpy(errormsg, buffer,1024);
      		strlcat(errormsg, " is not a valid ID",sizeof(errormsg));
-			fprintf(stderr,"%s\n",errormsg);
-			return -1;
- 		}
-		return 0;
+				fprintf(stderr,"%s\n",errormsg);
+				return -1;
+ 			}		
   	}
-  	return -1;
+  	if(ferror(stdin))
+  	{
+  		fprintf(stderr,"%s\n",strerror(errno));
+  		return -1;
+  	}
+  	
+  	return 0;
 }
 
 ssize_t func2(int f2d)
@@ -841,36 +807,37 @@ ssize_t func2(int f2d)
 	size_t len = 0;
 	size_t limit = 1024;
 	ssize_t ret = 0;
-  	ret = read(f2d, &len, sizeof(len));
-  	if(ret < 0)
-  	{
-  		/* error handling */
-		fprintf(stderr,"%s.\n",strerror(errno));
+  ret = read(f2d, &len, sizeof(len));
+  if(ret < 0)
+  {
+  		fprintf(stderr,"%s.\n",strerror(errno));
   		return -1;
-  	}
-  	if(len > limit)
-	{
-		fprintf(stderr,"%s.\n",strerror(errno));
+  }
+  if(len > limit)
+  {
+		fprintf(stderr,"too large length\n");
 		return -1;
-  	}
+  }
  	buf2 = calloc(len+1,sizeof(char));
-  	if(buf2==NULL)
-  	{
-  		/*error handling */
+  
+  
+  
+  if(buf2==NULL)
+  {
+  		
 		fprintf(stderr,"%s.\n",strerror(errno));
 		return -1;
-  	}
-  	ret = read(f2d, buf2,len);
-  	if(ret < 0)
-  	{
-    	/*error handling */
-    	fprintf(stderr,"%s.\n",strerror(errno));
-    	free(buf2);
-    	return -1;
-  	} 
-  	buf2[ret] = '\0';
-  	free(buf2);
-  	return 0;
+  }
+  ret = read(f2d, buf2,len);
+  if(ret < 0)
+  {
+    fprintf(stderr,"%s.\n",strerror(errno));
+    free(buf2);
+    return -1;
+  } 
+  buf2[ret] = '\0';
+  free(buf2);
+  return 0;
 }
 
 
@@ -878,40 +845,34 @@ ssize_t func3(int f3d)
 {
 	char *buf3 = NULL;
 	size_t len = 0;
-  	ssize_t ret = 0;
-  	ret = read(f3d, &len, sizeof(len));
-  	if(ret < 0)
-  	{
-  		/*error handling*/
+  ssize_t ret = 0;
+  ret = read(f3d, &len, sizeof(len));
+  if(ret < 0)
+  {
 		fprintf(stderr,"%s.\n",strerror(errno));
-  		return -1;
-  	}
-  	if (len > 8000) 
-  	{ 
-		printf("error len > 8000:\n");
-  		fprintf(stderr,"too large length\n");
-  		return -1; 
-  	}
-  
-  	buf3 = calloc(len+1,sizeof(char));
-  	if(buf3==NULL)
- 	{
-		/* error handling */
+  	return -1;
+  }
+  if (len > 8000) 
+  { 	
+  	fprintf(stderr,"too large length\n");
+  	return -1; 
+  }
+  buf3 = calloc(len+1,sizeof(char));
+  if(buf3==NULL)
+  {
 		fprintf(stderr,"%s.\n",strerror(errno));
-  		return -1;
-  	}
-
-  	ret = read(f3d, buf3,len);
-  	if(ret < 0)
-  	{
-  		/*error handling */
+  	return -1;
+  }
+	ret = read(f3d, buf3,len);
+  if(ret < 0)
+  {
 		fprintf(stderr,"%s.\n",strerror(errno));
-  		free(buf3);
-  		return -1;
-  	}
-  	buf3[ret] = '\0';
   	free(buf3);
-  	return 0;     
+  	return -1;
+  }
+  buf3[ret] = '\0';
+  free(buf3);
+  return 0;     
 }
 
 
@@ -921,9 +882,9 @@ int  main()
 	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
 	char *buffer = (char *)malloc(10 * sizeof(char));
 	ssize_t ret = 0;
+	
 	if(buffer==NULL)
 	{
-		/*error handling */
 		fprintf(stderr,"%s.\n",strerror(errno));
 		return -1;
 	}
@@ -946,11 +907,25 @@ int  main()
 	return 0;
 }
 \end{lstlisting}
-
-
+The above code was obtained by merging the changes made to the fragment using Flawfinder and those made using Splint.\\
+A summary of the main changes made:
+\begin{itemize}
+  \item even if in the \texttt{func1()} function, the \texttt{strcpy} and \texttt{strcat} functions were used safely,it was decided to replace them anyway with the \textit{"l-version"}, as it is considered more efficient.
+  \item All the variables have been initialized.
+  \item In the \texttt{func3()} function the vulnerability that caused the sign error and the subsequent buffer overflow was solved by checking that the variable \texttt{len} did not assume negative values.This could happen because len was int.\\
+In the end it was decided to make \texttt{len} a variable of type \texttt{size\_t}, just like in in the \texttt{func2()} function,so you don't have to worry about it taking negative values.
+\item All errors are handled and printed on the standard error.
+All functions return 0 in case of success and -1 in case of failure.\\
+This increases the reliability of the program.
+\item All allocated memory blocks are correctly released before each return.
+\item In the absence of particular performance requirements, the \texttt{malloc} function has been replaced by the \texttt{calloc} function, which, although considered less efficient, is safer because in addition to allocating the required memory, it also takes care of its initialization.
+\end{itemize}
 \section{Conclusion}
 
-
+Flawfinder and Splint are powerful and very useful tools to look for vulnerabilities in your code, correct errors and improve the overall reliability of the program.
+However, they are not infallible.\\
+As we have seen, it can happen that some of the hits are simply false positives. It is therefore unthinkable to rely completely on these tools.\\
+To be able to make the best use of them, a basic knowledge of software security is required to make the right choices and distinguish real vulnerabilities from false positives or find vulnerabilities that these programs can't find.
 
 
 
@@ -999,12 +974,14 @@ Weakness Enumeration),CWE-476,\\\texttt{https://cwe.mitre.org/data/definitions/4
  \bibitem{CWE252} CWE (Common
 Weakness Enumeration),CWE-252,\\\texttt{https://cwe.mitre.org/data/definitions/252.html}
 
+ \bibitem{CWE772} CWE (Common
+Weakness Enumeration),CWE-772,\\\texttt{https://cwe.mitre.org/data/definitions/772.html}
+
  \bibitem{nulldef} Null Deference,\\\texttt{https://www.owasp.org/index.php/Null\_Dereference\#Description}
 
  \bibitem{memoryleak} Memory Leak,\\\texttt{https://www.owasp.org/index.php/Memory\_leak}
 
 \end{thebibliography}
-
 
 \end{document}
 
