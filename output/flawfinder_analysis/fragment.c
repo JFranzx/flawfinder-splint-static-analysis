@@ -53,6 +53,7 @@ int  main()
 	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
 	char *buffer = (char *)malloc(10 * sizeof(char));
 	strcpy(buffer, foo);
+	exit(0);
 	func1();
 	func3(sizeof(*foo));
 }

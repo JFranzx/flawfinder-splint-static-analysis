@@ -182,7 +182,7 @@ On line 55 of the fragment, the \texttt{strcpy} function does not check for buff
 
 Portion of the fragment code, affected by the possible vulnerability:
 \begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={\ifnum\value{lstnumber}=55\color{red}\fi}]
-int  main()
+void  main()
 {
 	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
 	char *buffer = (char *)malloc(10 * sizeof(char));
@@ -218,7 +218,7 @@ How to use strlcpy function:\\
 \noindent
 Based on the previous information, this is the portion of the fragment where the vulnerability has been removed:
 \begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={\ifnum\value{lstnumber}=55\color{green}\fi}]
-int  main()
+void main()
 {
 	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
 	char *buffer = (char *)malloc(10 * sizeof(char));
@@ -349,7 +349,7 @@ The variable \texttt{len} is of type \texttt{size\_t}: size\_t is an unsigned in
 An attacker can supply the \textbf{maximum possible value} for size\_t,causing an interger overflow on line 28, indeed assuming that MAX\_VALUE represents the maximum value that size\_t can assume,we have that MAX\_VALUE +1 = 0 and that's exactly what happens on line 28 in this case.
 \newpage
 \noindent
-Based on the previous information, this is the portion of the fragment where the vulnerabilities has been removed:
+Based on the previous information, this is the portion of the fragment where \textbf{these} vulnerabilities has been removed:
 \begin{lstlisting}[style=c,numbers=left,firstnumber=23,linebackgroundcolor={
 \ifnum\value{lstnumber}=27\color{green}\fi
 \ifnum\value{lstnumber}=28\color{green}\fi
@@ -414,7 +414,7 @@ In this case the variable \texttt{len} is not of type \texttt{size\_t}, but of t
 An attacker can supply a negative value for \texttt{len},that  will be converted to a large positive value when it gets cast to an unsigned integer on line 46 (hit no.9),causing a buffer overflow.\\
 \newpage
 \noindent
-Based on the previous information, this is the portion of the fragment where the vulnerabilities has been removed:
+Based on the previous information, this is the portion of the fragment where \textbf{these} vulnerabilities has been removed:
 \begin{lstlisting}[style=c,numbers=left,firstnumber=35,linebackgroundcolor={
 \ifnum\value{lstnumber}=39\color{green}\fi
 \ifnum\value{lstnumber}=40\color{green}\fi
@@ -438,86 +438,514 @@ A further check on the non-negativity of \texttt{len} is necessary to solve the 
 \newpage
 \subsection{Splint output}
 
-Running the program with this command:\begin{lstlisting}[style=DOS][language=bash]
+\begin{SpecialPar}
+\noindent
+The study of splint output focuses mainly on those warnings that can be considered weakness or vulnerability and cause serious security problems.
+\end{SpecialPar}
+\noindent
+To run Splint on the fragment you need to run this command:
+\begin{lstlisting}[style=DOS][language=bash]
   $ splint fragment.c
 \end{lstlisting}
+Since Splint produces many warnings,some of them are just false positives, others are real vulnerabilities to be solved.\\
+The explanation of these will take place by analyzing the warnings of each single method of the program (\texttt{main()}, \texttt{func1()}, \texttt{func2()},\texttt{func3()}) respectively.\\
+\\
+\noindent
+\textbf{main()}\\
 
-You get the following result:
 \begin{lstlisting}[style=DOS][language=bash]
-Splint 3.1.2 --- 20 Feb 2018
+fragment.c:54:17: Storage buffer may become null
+\end{lstlisting}
 
-fragment.c:2: Include file <unistd.h> matches the name of a POSIX library, but
-    the POSIX library is not being used.  Consider using +posixlib or
-    +posixstrictlib to select the POSIX library, or -warnposix to suppress this
-    message.
-  Header name matches a POSIX header, but the POSIX library is not selected.
-  (Use -warnposixheaders to inhibit warning)
-fragment.c: (in function func1)
+
+\begin{lstlisting}[style=DOS][language=bash]
+fragment.c:55:9: Possibly null storage buffer passed as non-null param:
+                    strcpy (buffer, ...)
+\end{lstlisting}
+On line 54 of the fragment, the code does not check if the buffer is NULL.\\
+The same buffer is passed in the next line to the \texttt{strcpy} function.\\
+This is a vulnerability with a \textit{CWE-476 weakness ID}: NULL Pointer Dereference \cite{CWE476}.\\
+\begin{lstlisting}[style=DOS][language=bash]
+fragment.c:58:2: Fresh storage buffer not released before return
+\end{lstlisting}
+The memory allocated to a buffer is not  realeased before return.\\
+This is a vulnerability with a \textit{CWE-772 weakness ID}: NULL Pointer Dereference \cite{CWE476}.\\
+\newpage
+Portion of the fragment code, affected by the possibile vulnerabilities:
+\begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={
+\ifnum\value{lstnumber}=54\color{red}\fi
+\ifnum\value{lstnumber}=55\color{red}\fi
+\ifnum\value{lstnumber}=58\color{red}\fi
+}]
+void  main()
+{
+	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
+	char *buffer = (char *)malloc(10 * sizeof(char));
+	strcpy(buffer, foo);
+	func1();
+	func3(sizeof(*foo));
+}
+\end{lstlisting}
+Regarding vulnerability CWE-476,a NULL pointer dereference occurs when the application dereferences a pointer that it expects to be valid, but is NULL, typically causing a crash or exit.
+Generally this type of vulnerability is related to the reliability of the software, but in some cases if an opponent is able to make this type of vulnerability happen,he might be able to use the resulting exception to bypass security logic or to cause the application to reveal debugging information that will be valuable in planning subsequent attacks \cite{nulldef}.\\
+Regarding vulnerability CWE-772,when a resource is not released after use,causes a memory leak.\\
+A memory leak is an unintentional form of memory consumption whereby the developer fails to free an allocated block of memory when no longer needed \cite{memoryleak}. it can allow attackers to cause a denial of service by causing the allocation of resources without triggering their release\cite{CWE772}.
+
+\newpage
+\noindent
+Based on the previous information, this is the portion of the fragment where \textbf{these} vulnerabilities has been removed:
+\begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={
+\ifnum\value{lstnumber}=56\color{green}\fi
+\ifnum\value{lstnumber}=66\color{green}\fi}]
+int  main()
+{
+	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
+	
+	char *buffer = (char *)malloc(10 * sizeof(char));
+  if(buffer==NULL)
+	{
+	    /*error handling*/
+     	    return -1;
+	}
+	strcpy(buffer, foo);
+	func1();
+   
+	func3(sizeof(*foo));
+	
+	free(buffer);
+	return 0;
+}
+
+\end{lstlisting}
+To solve the NULL pointer deference, always check the return value of the malloc function and always release a buffer with the \texttt{free()} function to avoid memory leaks.\\\\
+
+
+\noindent
+\textbf{func1()}\\
+
+\begin{lstlisting}[style=DOS][language=bash]
 fragment.c:11:3: Return value (type char *) ignored: fgets(buffer, 10...
   Result returned by function call is not used. If this is intended, can cast
   result to (void) to eliminate message. (Use -retvalother to inhibit warning)
-fragment.c: (in function func2)
+\end{lstlisting}
+
+Portion of the fragment code, affected by the possibile vulnerabilities:
+\begin{lstlisting}[style=c,numbers=left,firstnumber=7,linebackgroundcolor={
+\ifnum\value{lstnumber}=11\color{red}\fi
+}]
+void func1()
+{	
+	char buffer[1024];
+  printf("Please enter your user id :");
+  fgets(buffer, 1024, stdin);
+ 
+  if (!isalpha(buffer[0]))
+  {
+
+     char errormsg[1044];
+     strncpy(errormsg, buffer,1024);
+     strcat(errormsg, " is not  a valid ID");
+ 	}
+}
+\end{lstlisting}
+
+\noindent
+Based on the previous information, this is the portion of the fragment where \textbf{these} vulnerabilities has been removed:
+\begin{lstlisting}[style=c,numbers=left,firstnumber=7,linebackgroundcolor={
+\ifnum\value{lstnumber}=11\color{green}\fi}]
+void func1()
+{	
+	char buffer[1024];
+  printf("Please enter your user id :");
+ if(fgets(buffer, 1024, stdin)!=NULL){
+ 
+  if (!isalpha(buffer[0]))
+  {
+
+     char errormsg[1044];
+     strncpy(errormsg, buffer,1024);
+     strcat(errormsg, " is not  a valid ID");
+ 	}
+ }
+}
+
+
+\end{lstlisting}
+aaaaaa\\\\\\
+
+
+\noindent
+\textbf{func2()}\\
+\begin{lstlisting}[style=DOS][language=bash]
 fragment.c:27:13: Passed storage &len not completely defined:
                      read (..., &len, ...)
   Storage derivable from a parameter, return value or global is not defined.
   Use /*@out@*/ to denote passed or returned storage which need not be defined.
   (Use -compdef to inhibit warning)
+\end{lstlisting}
+
+\begin{lstlisting}[style=DOS][language=bash]
 fragment.c:27:3: Return value (type ssize_t) ignored: read(f2d, &len, ...
+\end{lstlisting}
+
+
+\begin{lstlisting}[style=DOS][language=bash]
 fragment.c:29:13: Possibly null storage buf2 passed as non-null param:
                      read (..., buf2, ...)
   A possibly null pointer is passed as a parameter corresponding to a formal
   parameter with no /*@null@*/ annotation.  If NULL may be used for this
   parameter, add a /*@null@*/ annotation to the function parameter declaration.
   (Use -nullpass to inhibit warning)
-   fragment.c:28:10: Storage buf2 may become null
+\end{lstlisting}
+
+\begin{lstlisting}[style=DOS][language=bash]
+ fragment.c:28:10: Storage buf2 may become null
+\end{lstlisting}
+
+
+\begin{lstlisting}[style=DOS][language=bash]
 fragment.c:29:13: Passed storage buf2 not completely defined (*buf2 is
                      undefined): read (..., buf2, ...)
-   fragment.c:28:3: Storage *buf2 allocated
+\end{lstlisting}
+
+\begin{lstlisting}[style=DOS][language=bash]
+fragment.c:28:3: Storage *buf2 allocated
+\end{lstlisting}
+
+\begin{lstlisting}[style=DOS][language=bash]
 fragment.c:29:3: Return value (type ssize_t) ignored: read(f2d, buf2, len)
+\end{lstlisting}
+
+\begin{lstlisting}[style=DOS][language=bash]
 fragment.c:32:2: Fresh storage buf2 not released before return
   A memory leak has been detected. Storage allocated locally is not released
   before the last reference to it is lost. (Use -mustfreefresh to inhibit
   warning)
+\end{lstlisting}
+
+\begin{lstlisting}[style=DOS][language=bash]
    fragment.c:28:3: Fresh storage buf2 created
 fragment.c: (in function func3)
+\end{lstlisting}
+
+
+Portion of the fragment code, affected by the possibile vulnerabilities:
+\begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={
+\ifnum\value{lstnumber}=54\color{red}\fi
+\ifnum\value{lstnumber}=55\color{red}\fi
+\ifnum\value{lstnumber}=58\color{red}\fi
+}]
+void func2(int f2d)
+{
+	char *buf2;
+	size_t len;
+  read(f2d, &len, sizeof(len));
+  buf2 = malloc(len+1); 
+  read(f2d, buf2, len); 
+  buf2[len] = '\0';
+
+}
+
+\end{lstlisting}
+
+\noindent
+Based on the previous information, this is the portion of the fragment where \textbf{these} vulnerabilities has been removed:
+\begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={
+\ifnum\value{lstnumber}=56\color{green}\fi
+\ifnum\value{lstnumber}=66\color{green}\fi}]
+static void func2(int f2d)
+{
+	char *buf2 = NULL;;
+	size_t len = 0;
+        ssize_t ret = 0;
+        if((ret = read(f2d, &len, sizeof(len)))> 0){
+  		buf2 = calloc(len+1,sizeof(char));
+		if(buf2 == NULL)
+		{
+			/*error handling */
+			return;
+		} 
+  		if((ret = read(f2d,buf2, len))>0){ 
+  		  buf2[ret] = '\0';
+		  
+		}
+		else
+		{
+		  free(buf2);
+		  /*error handling */
+		  return;
+		}
+	}
+	else
+	{
+		/* error handling */
+	}
+	free(buf2);
+
+}
+
+
+\end{lstlisting}
+
+
+\noindent
+\textbf{func3()}\\
+
+   
+\begin{lstlisting}[style=DOS][language=bash]
 fragment.c:39:13: Passed storage &len not completely defined:
                      read (..., &len, ...)
+\end{lstlisting}
+
+
+\begin{lstlisting}[style=DOS][language=bash]
 fragment.c:39:3: Return value (type ssize_t) ignored: read(f3d, &len, ...
+\end{lstlisting}
+
+\begin{lstlisting}[style=DOS][language=bash]
 fragment.c:45:17: Function malloc expects arg 1 to be size_t gets int: len
   To allow arbitrary integral types to match any integral type, use
   +matchanyintegral.
+\end{lstlisting}
+
+\begin{lstlisting}[style=DOS][language=bash]
 fragment.c:46:18: Function read expects arg 3 to be size_t gets int: len
+\end{lstlisting}
+
+
+\begin{lstlisting}[style=DOS][language=bash]
 fragment.c:46:13: Possibly null storage buf3 passed as non-null param:
                      read (..., buf3, ...)
-   fragment.c:45:10: Storage buf3 may become null
+\end{lstlisting}
+
+\begin{lstlisting}[style=DOS][language=bash]
+ fragment.c:45:10: Storage buf3 may become null
+\end{lstlisting}
+
+\begin{lstlisting}[style=DOS][language=bash]
 fragment.c:46:13: Passed storage buf3 not completely defined (*buf3 is
                      undefined): read (..., buf3, ...)
-   fragment.c:45:3: Storage *buf3 allocated
+\end{lstlisting}
+
+\begin{lstlisting}[style=DOS][language=bash]
+ fragment.c:45:3: Storage *buf3 allocated
+\end{lstlisting}
+
+\begin{lstlisting}[style=DOS][language=bash]
 fragment.c:46:3: Return value (type ssize_t) ignored: read(f3d, buf3, len)
+\end{lstlisting}
+
+\begin{lstlisting}[style=DOS][language=bash]
 fragment.c:47:2: Fresh storage buf3 not released before return
-   fragment.c:45:3: Fresh storage buf3 created
-fragment.c: (in function main)
-fragment.c:55:9: Possibly null storage buffer passed as non-null param:
-                    strcpy (buffer, ...)
-   fragment.c:54:17: Storage buffer may become null
-fragment.c:57:14: Function func3 expects arg 1 to be int gets size_t:
-                     sizeof((*foo))
-fragment.c:58:2: Path with no return in function declared to return int
-  There is a path through a function declared to return a value on which there
-  is no return statement. This means the execution may fall through without
-  returning a meaningful result to the caller. (Use -noret to inhibit warning)
-fragment.c:58:2: Fresh storage buffer not released before return
-   fragment.c:54:51: Fresh storage buffer created
-fragment.c:7:6: Function exported but not used outside fragment: func1
-  A declaration is exported, but not used outside this module. Declaration can
-  use static qualifier. (Use -exportlocal to inhibit warning)
-   fragment.c:20:1: Definition of func1
-fragment.c:35:6: Function exported but not used outside fragment: func3
-   fragment.c:47:1: Definition of func3
+\end{lstlisting}
+\begin{lstlisting}[style=DOS][language=bash]
+  fragment.c:45:3: Fresh storage buf3 created
+\end{lstlisting}
+
+
+Portion of the fragment code, affected by the possibile vulnerabilities:
+\begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={
+\ifnum\value{lstnumber}=54\color{red}\fi
+\ifnum\value{lstnumber}=55\color{red}\fi
+\ifnum\value{lstnumber}=58\color{red}\fi
+}]
+void func3(int f3d)
+{
+	char *buf3;
+  int len;
+  read(f3d, &len, sizeof(len));
+  if (len > 8000) 
+  { 
+  	perror("too large length");
+  	return; 
+	}
+  buf3 = malloc(len);
+  read(f3d, buf3,len);        
+}
+\end{lstlisting}
+
+
+\newpage
+\noindent
+Based on the previous information, this is the portion of the fragment where \textbf{these} vulnerabilities has been removed:
+\begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={
+\ifnum\value{lstnumber}=56\color{green}\fi
+\ifnum\value{lstnumber}=66\color{green}\fi}]
+static void func3(int f3d)
+{
+	
+
+char *buf3;
+  int len = 0;
+  ssize_t ret = 0;
+  if((ret=read(f3d, &len, sizeof(len)))<0){
+        /*error_handling*/
+	return;
+  }
+  if (len > 8000) 
+  { 
+  	perror("too large length");
+  	return; 
+	}
+  buf3 = calloc((size_t)len,sizeof(char));
+  if(buf3==NULL)
+  {
+     /*error_handling*/
+     return;
+  }
+  if((ret=read(f3d, buf3,(size_t)len))<0)
+  {
+     /*error handling */
+     free(buf3);
+     return;
+  }
+  free(buf3);        
+}
+
 
 \end{lstlisting}
-\section{Corrected version of the fragment}
 
+
+\section{Corrected version of the fragment}
+\newpage
+\begin{lstlisting}[style=c, basicstyle=\scriptsize,numbers=left,firstnumber=1]
+#include <stdio.h>
+#include <ctype.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
+#include <bsd/string.h>
+#include <errno.h>
+
+ssize_t func1()
+{	
+	char buffer[1024];
+  	if(fgets(buffer, 1024, stdin)!=NULL)
+  	{
+  		if (!isalpha(buffer[0]))
+  		{
+    	 	char errormsg[1044];
+     		strlcpy(errormsg, buffer,1024);
+     		strlcat(errormsg, " is not a valid ID",sizeof(errormsg));
+			fprintf(stderr,"%s\n",errormsg);
+			return -1;
+ 		}
+		return 0;
+  	}
+  	return -1;
+}
+
+ssize_t func2(int f2d)
+{
+	char *buf2 = NULL;
+	size_t len = 0;
+	size_t limit = 1024;
+	ssize_t ret = 0;
+  	ret = read(f2d, &len, sizeof(len));
+  	if(ret < 0)
+  	{
+  		/* error handling */
+		fprintf(stderr,"%s.\n",strerror(errno));
+  		return -1;
+  	}
+  	if(len > limit)
+	{
+		fprintf(stderr,"%s.\n",strerror(errno));
+		return -1;
+  	}
+ 	buf2 = calloc(len+1,sizeof(char));
+  	if(buf2==NULL)
+  	{
+  		/*error handling */
+		fprintf(stderr,"%s.\n",strerror(errno));
+		return -1;
+  	}
+  	ret = read(f2d, buf2,len);
+  	if(ret < 0)
+  	{
+    	/*error handling */
+    	fprintf(stderr,"%s.\n",strerror(errno));
+    	free(buf2);
+    	return -1;
+  	} 
+  	buf2[ret] = '\0';
+  	free(buf2);
+  	return 0;
+}
+
+
+ssize_t func3(int f3d)
+{
+	char *buf3 = NULL;
+	size_t len = 0;
+  	ssize_t ret = 0;
+  	ret = read(f3d, &len, sizeof(len));
+  	if(ret < 0)
+  	{
+  		/*error handling*/
+		fprintf(stderr,"%s.\n",strerror(errno));
+  		return -1;
+  	}
+  	if (len > 8000) 
+  	{ 
+		printf("error len > 8000:\n");
+  		fprintf(stderr,"too large length\n");
+  		return -1; 
+  	}
+  
+  	buf3 = calloc(len+1,sizeof(char));
+  	if(buf3==NULL)
+ 	{
+		/* error handling */
+		fprintf(stderr,"%s.\n",strerror(errno));
+  		return -1;
+  	}
+
+  	ret = read(f3d, buf3,len);
+  	if(ret < 0)
+  	{
+  		/*error handling */
+		fprintf(stderr,"%s.\n",strerror(errno));
+  		free(buf3);
+  		return -1;
+  	}
+  	buf3[ret] = '\0';
+  	free(buf3);
+  	return 0;     
+}
+
+
+
+int  main()
+{
+	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
+	char *buffer = (char *)malloc(10 * sizeof(char));
+	ssize_t ret = 0;
+	if(buffer==NULL)
+	{
+		/*error handling */
+		fprintf(stderr,"%s.\n",strerror(errno));
+		return -1;
+	}
+	strlcpy(buffer,foo,sizeof(buffer));
+	ret = func1();
+	if(ret < 0)
+	{
+		free(buffer);
+		fprintf(stderr,"%s.\n",strerror(errno));
+		return -1;
+	}
+	ret = func3((int)sizeof(*foo));
+	if(ret <0)
+	{
+		free(buffer);
+		fprintf(stderr,"%s.\n",strerror(errno));
+		return -1;
+	}
+	free(buffer);
+	return 0;
+}
+\end{lstlisting}
 
 
 \section{Conclusion}
@@ -564,9 +992,16 @@ Why strcpy and strncpy are not safe to use,\\\texttt{https://www.geeksforgeeks.o
 
 \bibitem{strcpy} 
 strcpy in cpluspluc reference,\\\texttt{http://www.cplusplus.com/reference/cstring/strcpy/}
+ 
+ \bibitem{CWE476} CWE (Common
+Weakness Enumeration),CWE-476,\\\texttt{https://cwe.mitre.org/data/definitions/476.html}
 
-\bibitem{dangerc} 
-Secure Programming for Linux and Unix HOWTO,Chapter 6. Avoid Buffer Overflow\\\texttt{https://dwheeler.com/secure-programs/3.50/Secure-Programs-HOWTO/dangers-c.html}
+ \bibitem{CWE252} CWE (Common
+Weakness Enumeration),CWE-252,\\\texttt{https://cwe.mitre.org/data/definitions/252.html}
+
+ \bibitem{nulldef} Null Deference,\\\texttt{https://www.owasp.org/index.php/Null\_Dereference\#Description}
+
+ \bibitem{memoryleak} Memory Leak,\\\texttt{https://www.owasp.org/index.php/Memory\_leak}
 
 \end{thebibliography}
 
