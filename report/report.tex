@@ -8,6 +8,7 @@
 \usepackage{lstlinebgrd}
 \usepackage{babel,xcolor,framed,marginnote,blindtext}
 \usepackage{listings}
+\usepackage[nottoc]{tocbibind}
 \colorlet{shadecolor}{blue!10}
 \lstdefinestyle{DOS}
 {
@@ -43,6 +44,7 @@
 %
 \begin{document}
 %
+
    \title{Static code analysis report}
 
    \author{Francesco Paolo Di Lorenzo  \\ student ID: 1712990 \\ e-mail: dilorenzo.1712990@studenti.uniroma1.it}
@@ -51,7 +53,9 @@
 
    \maketitle
    
-   
+
+ 
+\tableofcontents
  
 
 
@@ -486,7 +490,7 @@ void  main()
 	func3(sizeof(*foo));
 }
 \end{lstlisting}
-Regarding vulnerability CWE-476,a NULL pointer dereference occurs when the application dereferences a pointer that it expects to be valid, but is NULL, typically causing a crash or exit.
+Regarding vulnerability CWE-476, a NULL pointer dereference occurs when the application dereferences a pointer that it expects to be valid, but is NULL, typically causing a crash or exit.
 Generally this type of vulnerability is related to the reliability of the software, but in some cases if an opponent is able to make this type of vulnerability happen,he might be able to use the resulting exception to bypass security logic or to cause the application to reveal debugging information that will be valuable in planning subsequent attacks \cite{nulldef}.\\
 Regarding vulnerability CWE-772,when a resource is not released after use,causes a memory leak.\\
 A memory leak is an unintentional form of memory consumption whereby the developer fails to free an allocated block of memory when no longer needed \cite{memoryleak}. it can allow attackers to cause a denial of service by causing the allocation of resources without triggering their release\cite{CWE772}.
@@ -697,10 +701,10 @@ fragment.c:47:2: Fresh storage buf3 not released before return
 \end{lstlisting}
 These warnings represent weaknesses / vulnerabilities already encountered with analyzing the previous functions
 Portion of the fragment code, affected by the possibile vulnerabilities:
-\begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={
-\ifnum\value{lstnumber}=55\color{red}\fi
-\ifnum\value{lstnumber}=61\color{red}\fi
-\ifnum\value{lstnumber}=62\color{red}\fi
+\begin{lstlisting}[style=c,numbers=left,firstnumber=54,linebackgroundcolor={
+\ifnum\value{lstnumber}=58\color{red}\fi
+\ifnum\value{lstnumber}=65\color{red}\fi
+\ifnum\value{lstnumber}=66\color{red}\fi
 }]
 void func3(int f3d)
 {
@@ -721,17 +725,15 @@ void func3(int f3d)
 \newpage
 \noindent
 Based on the previous information, this is the portion of the fragment where \textbf{these} vulnerabilities and weaknesses have been removed:
-\begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={
-\ifnum\value{lstnumber}=58\color{green}\fi
-\ifnum\value{lstnumber}=68\color{green}\fi
-\ifnum\value{lstnumber}=73\color{green}\fi
-\ifnum\value{lstnumber}=76\color{green}\fi
-\ifnum\value{lstnumber}=79\color{green}\fi}]
-static void func3(int f3d)
+\begin{lstlisting}[style=c,numbers=left,firstnumber=54,linebackgroundcolor={
+\ifnum\value{lstnumber}=59\color{green}\fi
+\ifnum\value{lstnumber}=69\color{green}\fi
+\ifnum\value{lstnumber}=74\color{green}\fi
+\ifnum\value{lstnumber}=77\color{green}\fi
+\ifnum\value{lstnumber}=80\color{green}\fi}]
+void func3(int f3d)
 {
-	
-
-char *buf3;
+  char *buf3;
   int len = 0;
   ssize_t ret = 0;
   if((ret=read(f3d, &len, sizeof(len)))<0){
@@ -764,6 +766,7 @@ char *buf3;
 \begin{SpecialPar}
 \noindent
 \texttt{note}: Not all warnings have been taken into consideration in this splint output analysis.\\
+
 Many of Splint's warnings do not represent a real vulnerability, but suggestions for obtaining a higher quality and more reliable code.\\
 Despite this, most of the warnings have been analyzed and solved in order to obtain a more reliable and error-free code.
 \end{SpecialPar}
@@ -982,6 +985,5 @@ Weakness Enumeration),CWE-772,\\\texttt{https://cwe.mitre.org/data/definitions/7
  \bibitem{memoryleak} Memory Leak,\\\texttt{https://www.owasp.org/index.php/Memory\_leak}
 
 \end{thebibliography}
-
 \end{document}
 
