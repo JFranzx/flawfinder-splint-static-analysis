@@ -4,7 +4,15 @@
 \contentsline {subsection}{\numberline {1.2}Splint}{2}
 \contentsline {section}{\numberline {2}Output description}{3}
 \contentsline {subsection}{\numberline {2.1}Flawfinder output}{3}
+\contentsline {subsubsection}{\numberline {2.1.1}Hit no.1}{5}
+\contentsline {subsubsection}{\numberline {2.1.2}Hits no.2,no.3,no.4,no.5}{7}
+\contentsline {subsubsection}{\numberline {2.1.3}Hits no.6,no.7}{8}
+\contentsline {subsubsection}{\numberline {2.1.4}Hits no.8,no.9}{11}
 \contentsline {subsection}{\numberline {2.2}Splint output}{13}
+\contentsline {subsubsection}{\numberline {2.2.1}main}{13}
+\contentsline {subsubsection}{\numberline {2.2.2}func1}{15}
+\contentsline {subsubsection}{\numberline {2.2.3}func2}{17}
+\contentsline {subsubsection}{\numberline {2.2.4}func3}{19}
 \contentsline {section}{\numberline {3}Corrected version of the fragment}{21}
 \contentsline {section}{\numberline {4}Conclusion}{24}
 \contentsline {section}{References}{24}

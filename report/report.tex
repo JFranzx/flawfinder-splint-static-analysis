@@ -67,16 +67,16 @@ The last section presents the correct version of the program obtained by solving
 
 
 \section{Static Analysis tools}
-This section describes main strenghts and weaknesses of Flawfinder and Splint.
+This section describes the major strengths and weaknesses of Flawfinder and Splint.
 \subsection{Flawfinder}
-Flawfinder is a tool for statically scanning C/C++ source code for \texttt{possible security weaknesses}. These security weaknesses are called \textit{flaws} or \textit{hits} and are ordered by risk level.\\
-The risk level is shown in square brackets and can take value ranging from 0 (very little risk) to 5(high risk)\cite{flaw}.\\
-Furthermore it is compatible with CWE (Common
-Weakness Enumeration)\cite{flaw2}\cite{CWE} and may detect many of the most widespread and
+Flawfinder is a tool for statically checking C/C++ source code for \texttt{possible security weaknesses}. These security weaknesses are called \textit{flaws} or \textit{hits} and are ordered by risk level.\\
+The risk level is shown in square brackets and can take value ranging from 0 (very little risk) to 5 (high risk)\cite{flaw}.\\
+Furthermore it is compatible with \textit{CWE (Common
+Weakness Enumeration)} \cite{flaw2}\cite{CWE} and may detect many of the most widespread and
 critical errors drafted in the 2011 CWE/SANS Top 25 list.\\
-Flawfinder is a simple and easy to use tool. This involves some pros and cons.\cite{flaw}\\
+Flawfinder is a simple and easy to use tool. This involves some pros and cons \cite{flaw}.\\
 Unlike programs such as Splint or gcc's warning flags, Flawfinder has no access to the program control flow, data flow and data type when looking for vulnerabilities.
-This leads the program to produce false positives or fail to report some vulnerabilities.
+This leads the program to produce \texttt{false positives} or fail to report some vulnerabilities.
 In his favor, instead, we have that he can also analyze programs that cannot be compiled,in a fast and efficient way.
 
 
@@ -85,18 +85,18 @@ In his favor, instead, we have that he can also analyze programs that cannot be 
 
 
 \subsection{Splint}
-Splint is a tool for statically checking C programs for \texttt{possible security vulnerabilities and coding mistakes}.\cite{splint}\\
+Splint is a tool for statically checking C programs for \texttt{possible security vulnerabilities and coding mistakes} \cite{splint}.\\
 It is very useful for checking type,checking of variable and function assignments, efficiency, unused variables and function identifiers,unreachable code and possible memory leaks.\\
-Splint is a very light static analysis tool, it helps to improve the quality of the code, even if it does not help to eliminate all the security flaws and produces many warnings that can lead to confusion\cite{splint2}.
+Splint is a very light static analysis tool, it helps to improve the quality of the code, even if it does not help to eliminate all the security flaws and produces many warnings that can lead to confusion \cite{splint2}.
 
 
 
 \newpage
 \section{Output description}
-This section describes the outputs of the respective tools and shows how starting from these outputs, it is possible to improve the code and free it from vulnerabilities and errors that can lead to serious problems.
+This section describes the outputs of the respective tools and shows how starting from these outputs, it is possible to improve the code and free it from vulnerabilities and errors that can lead to serious security problems.
 \begin{SpecialPar}
 \noindent
-As mentioned in the previous section, one of the peculiarities of Flawfinder is that it can perform analysis even on fragments of C / C ++ code that cannot be compiled.
+note: As mentioned in the previous section, one of the peculiarities of Flawfinder is that it can perform analysis even on fragments of C / C ++ code that cannot be compiled.
 The fragment available for this analysis is a fragment of text in which there is a C code.
 Splint does not have the same peculiarity as Flawfinder and causes problems with files that do not have a C extension and are not written so that they can be compiled.\\
 For simplicity, the fragment has been modified into a C code fragment with a \textit{.c} extension and has been compiled after small modifications, so it was possible to analyze the \textit{.c} fragment without problems even with Splint.
@@ -169,12 +169,13 @@ See 'Secure Programming HOWTO'
 \end{lstlisting}
 The output of Flawfinder is basically divided into 2 parts.
 In the first part called \textit{Final Results} shows and describes all the \textit{hits} found at the end of the static analysis.\\
-In the second part instead shows the number of these hits, the number of hits that belong to a certain level of risk and information on the time taken to analyze the fragment lines.\\
+In the second part called \textit{Analysis Summary} instead it shows the number of these hits, the number of hits that belong to a certain level of risk and information on the time taken to analyze the fragment lines.\\
 Furthermore, Flawfinder reminds that not all of these hits must necessarily represent vulnerabilities, stating that some of them may be false positives: find out what, programmer's job is.\\
 So the fragment has nine hits,let's describe them one by one and try to understand if they actually represent a vulnerability or a false positive.\\
 In the first case, it is shown how to solve the vulnerability to obtain a more secure code.\\
 \newpage
-\textbf{Hit No.1} (Risk level 4)
+\subsubsection{Hit no.1}
+(Risk level 4)
 \begin{lstlisting}[style=DOS][language=bash]
 fragment.c:55:  [4] (buffer) strcpy:
   Does not check for buffer overflows when copying to destination [MS-banned]
@@ -195,22 +196,20 @@ void  main()
 	func3(sizeof(*foo));
 }
 \end{lstlisting}
-Looking at the documentation related to the strcpy function\cite{strcpy}, it is possible to see how this function is not safe:\\
+Looking at the documentation related to the strcpy function \cite{strcpy}, it is possible to see how this function is not safe:\\
 \begin{SpecialPar}
 \noindent
 \texttt{char * strcpy ( char * destination, const char * source );}
 Copies the C string pointed by source into the array 		pointed by destination, including the terminating null character (and stopping at that point).
 \end{SpecialPar}
 \noindent
-strcpy does not specify the size of the destination array and this is very dangerous because if the destination array is not large enough to accommodate the source string, this will cause a \textit{buffer overflow}.\\
-So Flawfinder suggests using other more secure functions like snprintf, strcpy\_s, strlcpy, strncpy.
-All these functions allow you to enter the size of the destination array, unlike strcpy.\\
-strncpy is poorly performing and less secure than the proposed functions.\\
-The problem with strncpy is that it if there is no null character among the first n character of the source, the string placed in destination will not be null-terminated.So strncpy() does not guarantee that the destination string will be NULL terminated.\\ Strings without the terminator character can cause \textit{segmentation fault} \cite{geeksstrcpy}.\\
-snprintf, on the other hand, always adds the NULL terminator character,but in some older systems, its implementation is subject to the \textit{buffer overflow}\cite{dangerc}.\\
-So the choice fell on the \textbf{strlcpy} function: safer and more performant \cite{dangerc} and always NULL-terminated,but not a standard C function.\\
-
-
+The \texttt{strcpy} function does not specify the size of the destination array and this is very dangerous because if the destination array is not large enough to accommodate the source string, this will cause a \textit{buffer overflow}.\\
+So Flawfinder suggests using other more secure functions like \texttt{snprintf}, \texttt{strcpy\_s}, \texttt{strlcpy}, \texttt{strncpy}.
+All these functions allow you to enter the size of the destination array, unlike \texttt{strcpy}.\\
+The \texttt{strncpy} function is poorly performing and less secure than the proposed functions.\\
+The problem with \texttt{strncpy} is that if there is no null character among the first \textit{n} character of the source, the string placed in destination will not be null-terminated. So \texttt{strncpy()} does not guarantee that the destination string will be null-terminated.\\ Strings without the terminator character can cause \textit{segmentation fault} \cite{geeksstrcpy}.\\
+The \texttt{snprintf} function, on the other hand, always adds the null-terminator character,but in some older systems, its implementation is subject to the \textit{buffer overflow}.\\
+So the choice fell on the \textbf{strlcpy} function: safer,more performant and always null-terminated,but not a standard C function.\\
 \begin{SpecialPar}
 
 \noindent
@@ -233,8 +232,9 @@ void main()
 \end{lstlisting}
 
 \break
-\textbf{Hits No.2,No.3,No.4} (Risk level 2), \textbf{No.5} (Risk level 1)
-
+\subsubsection{Hits no.2,no.3,no.4,no.5}
+no.2, no.3, no.3, no.4: (Risk level 2)\\
+no.5: (Risk level 1)
 \begin{lstlisting}[style=DOS][language=bash]
 fragment.c:9:  [2] (buffer) char:
   Statically-sized arrays can be improperly restricted, leading to potential
@@ -250,7 +250,7 @@ fragment.c:16:  [2] (buffer) char:
   functions that limit length, or ensure that the size is larger than the
   maximum possible length.
 \end{lstlisting}
-These two hits describe the same problem:There are in the code,two statically-sized arrays that can be improperly restricted, leading to potential overflows or other issues.This vulnerability is assigned the \textit{CWE-119!/CWE-20 weakness ID}\cite{CWE}	\\
+These two hits describe the same problem: there are in the code,two statically-sized arrays that can be improperly restricted, leading to potential overflows or other issues. This vulnerability is assigned the \textit{CWE-119/CWE-20 weakness ID} \cite{CWE}.	\\
 Flawfinder suggests performing a bounds checking and other actions to avoid possible overflows.
 
 \begin{lstlisting}[style=DOS][language=bash]
@@ -260,15 +260,15 @@ fragment.c:18:  [2] (buffer) strcat:
   snprintf (warning: strncat is easily misused). Risk is low because the
   source is a constant string.
 \end{lstlisting}
-This hit is very similar to the hit number 1 related to the strcpy function.\\
-On line 18 of the fragment,the \texttt{strcat} function does not check for buffer overflows when concatenating to destination.This vulnerability is assigned the \textit{CWE-120 weakness ID}, where \textit{CWE} stands for \textit{Common Weakness Enumaration}\cite{CWE}.\\
+This hit is very similar to the hit no.1 related to the \texttt{strcpy} function.\\
+On line 18 of the fragment,the \texttt{strcat} function does not check for buffer overflows when concatenating to destination. This vulnerability is assigned the \textit{CWE-120 weakness ID}.\\
 \begin{lstlisting}[style=DOS][language=bash]
 fragment.c:17:  [1] (buffer) strncpy:
   Easily used incorrectly; doesn't always \0-terminate or check for invalid
   pointers [MS-banned] (CWE-120).
 \end{lstlisting}
-Flawfinder reminds you that using the strcpy function can be dangerous.
-Here the same considerations made for the hit No.1 are valid: strncpy() does not guarantee that the destination string will be NULL terminated \cite{geeksstrcpy}
+Flawfinder reminds you that using the \texttt{strncpy} function can be dangerous.
+Here the same considerations made for the hit no.1 are valid: \texttt{strncpy()} does not guarantee that the destination string will be null-terminated \cite{geeksstrcpy}.
 \newpage
 \noindent
 
@@ -295,12 +295,13 @@ void func1()
 
 
 \end{lstlisting}
-The hit no.2 is a \textbf{false positive}: the fgets function reads at most 1024 from the standard input and stores them into \texttt{buffer},\texttt{buffer} has been statically allocated with 1024 bytes which are enough to not cause any overflow.\\\\
-The hits no.3, no.4, no.5 are also a \textbf{false positive}: \texttt{errormsg} is statically allocated with enough bytes to contain the contents of the buffer and the constant string \textit{"is not  a valid ID"}.\\
-Furthermore strncpy guarantees the NULL terminator character, since fgets always adds the NULL terminator character.
+The hit no.2 is a \textbf{false positive}: the \texttt{fgets} function reads at most 1024 from the standard input and stores them into \texttt{buffer}. \texttt{buffer} has been statically allocated with 1024 bytes which are enough to not cause any overflow.\\\\
+The hits no.3, no.4, no.5 are also a \textbf{false positive}: \texttt{errormsg} is statically allocated with enough bytes to contain the contents of the buffer and the constant string.\\
+Furthermore \texttt{strncpy} guarantees the null-terminator character, since \texttt{fgets} always adds the null-terminator character.
 \\
 \\
-\textbf{Hits No.6,No.7} (Risk level 1)
+\subsubsection{Hits no.6,no.7}
+(Risk level 1)
 
 \begin{lstlisting}[style=DOS][language=bash]
 fragment.c:27:  [1] (buffer) read:
@@ -314,13 +315,12 @@ fragment.c:29:  [1] (buffer) read:
   (CWE-120, CWE-20).
 
 \end{lstlisting}
-These hits concern the use of the read function.
-This vulnerability is assigned the \textit{CWE-120,CWE-20 weakness IDs}.\\
-In particular the weakness id 20 concerns an improper validation of the input.\cite{CWE}
-
+These hits concern the use of the \texttt{read} function. This vulnerability is assigned the \textit{CWE-120,CWE-20 weakness IDs}.\\
+In particular the weakness id 20 concerns an improper validation of the input\cite{CWE}.
+\newpage
 \begin{SpecialPar}
 \noindent
-CWE-20: Improper Input Validation\\
+note: CWE-20: Improper Input Validation\\
 Extended description: when software does not validate input properly, an attacker is able to craft the input in a form that is not expected by the rest of the application. This will lead to parts of the system receiving unintended input, which may result in altered control flow, arbitrary control of a resource, or arbitrary code execution \cite{CWE20}.
 \end{SpecialPar}
 
@@ -344,13 +344,13 @@ void func2(int f2d)
 
 
 \end{lstlisting}
-The hit no.6 is a \textbf{false positive}.\\
-The read function correctly reads sizeof(len) bytes from \texttt{f2d} and stores them in \texttt{len} which is large enough to accept them.\\
+The hit no.6 is a \texttt{false positive}.\\
+The \texttt{read} function correctly reads sizeof(len) bytes from \texttt{f2d} and stores them in \texttt{len} which is large enough to accept them.\\
 The main problem is caused by the fact that there is no validation of the input: an attacker can supply a large value of \texttt{len} which 
-overflows to zero (\textbf{integer overflow}) on line 28,which will cause a \textbf{buffer overflow} in the next line, since the read function uses the original value of len.\\
+overflows to zero (\textit{integer overflow}) on line 28, which will cause a \textit{buffer overflow} in the next line, since the \texttt{read} function uses the original value of \texttt{len}.\\
 How is it possible?\\
 The variable \texttt{len} is of type \texttt{size\_t}: size\_t is an unsigned integral data type,means that it can only take non-negative values.\\
-An attacker can supply the \textbf{maximum possible value} for size\_t,causing an interger overflow on line 28, indeed assuming that MAX\_VALUE represents the maximum value that size\_t can assume,we have that MAX\_VALUE +1 = 0 and that's exactly what happens on line 28 in this case.
+An attacker can supply the \emph{maximum possible value} for size\_t,causing an interger overflow on line 28, indeed assuming that \texttt{MAX\_VALUE} represents the maximum value that size\_t can have,we have that \texttt{MAX\_VALUE +1 = 0} and that's exactly what happens on line 28 in this case.
 \newpage
 \noindent
 Based on the previous information, this is the portion of the fragment where \textbf{these} vulnerabilities has been removed:
@@ -372,11 +372,11 @@ void func2(int f2d)
 
 }
 \end{lstlisting}
-To avoid the interger overflow and the consequent and possible buffer overflow and to resolve the vulnerability shown by the hit no.7, a variable called \texttt{limit} is used to limit the size of \texttt{len}.\\
+To avoid the \textit{interger overflow} and the consequent and possible \textit{buffer overflow} and to resolve the vulnerability shown by the hit no.7, a variable called \texttt{limit} is used to limit the size of \texttt{len}.\\
 This way the \texttt{read} function can never cause buffer overflows, since the destination buffer is sufficiently large (len +1).\\
-Finally it is not even necessary to check that the variable \texttt{len} can assume negative values, since the type of data \texttt{size\_t} can only assume \textbf{non-negative values}.
+Finally it is not even necessary to check that the variable \texttt{len} can assume negative values, since the type of data \texttt{size\_t} can only assume non-negative values.
 \newpage
-\textbf{Hits No.8,No.9} (Risk level 1)
+\subsubsection{Hits no.8,no.9} (Risk level 1)
 
 \begin{lstlisting}[style=DOS][language=bash]
 fragment.c:39:  [1] (buffer) read:
@@ -389,7 +389,7 @@ fragment.c:46:  [1] (buffer) read:
   Check buffer boundaries if used in a loop including recursive loops
   (CWE-120, CWE-20).
 \end{lstlisting}
-Like the previous hits, the latter also concern the use of the read function,so the considerations concerning the CWE-20 weakness ID also apply in this case.\\
+Like the previous hits, the latter also concern the use of the \texttt{read} function,so the considerations concerning the CWE-20 weakness ID also apply in this case.\\
 
 \noindent
 Portion of the fragment code, affected by the possibile vulnerabilities:
@@ -411,11 +411,11 @@ void func3(int f3d)
 }
 \end{lstlisting}
 The hit no.8 is a \textbf{false positive}.\\
-The \texttt{read} function correctly reads sizeof(len) bytes from \texttt{f2d} and stores them in \texttt{len} which is large enough to accept them.\\
+The \texttt{read} function correctly reads sizeof(len) bytes from \texttt{f3d} and stores them in \texttt{len} which is large enough to accept them.\\
 Also here the main problem is caused by an improper validation of the input.\\
-This function learns from the previous errors and tries to validate the input by checking that \texttt{len} value is not greater than a set value(avoid integer overflow).\\
+This function learns from the previous errors and tries to validate the input by checking that \texttt{len} value is not greater than a set value (avoiding integer overflow).\\
 In this case the variable \texttt{len} is not of type \texttt{size\_t}, but of type \texttt{int} that represents \emph{signed} integers.\\
-An attacker can supply a negative value for \texttt{len},that  will be converted to a large positive value when it gets cast to an unsigned integer on line 46 (hit no.9),causing a buffer overflow.\\
+An attacker can supply a negative value for \texttt{len},that  will be converted to a large positive value when it gets cast to an unsigned integer on line 46 (hit no.9), causing a buffer overflow.\\
 \newpage
 \noindent
 Based on the previous information, this is the portion of the fragment where \textbf{these} vulnerabilities has been removed:
@@ -452,10 +452,10 @@ To run Splint on the fragment you need to run this command:
   $ splint fragment.c
 \end{lstlisting}
 Since Splint produces many warnings,some of them are just false positives, others are real vulnerabilities to be solved.\\
-The explanation of these will take place by analyzing the warnings of each single method of the program (\texttt{main()}, \texttt{func1()}, \texttt{func2()},\texttt{func3()}) respectively.\\
+The explanation of these will take place by analyzing the warnings of each single function of the program (\texttt{main()}, \texttt{func1()}, \texttt{func2()},\texttt{func3()}) respectively.\\
 \\
 \noindent
-\textbf{main()}\\
+\subsubsection{main}
 
 \begin{lstlisting}[style=DOS][language=bash]
 fragment.c:54:17: Storage buffer may become null
@@ -473,7 +473,7 @@ This is a vulnerability with a \textit{CWE-476 weakness ID}: NULL Pointer Derefe
 fragment.c:58:2: Fresh storage buffer not released before return
 \end{lstlisting}
 The memory allocated to a buffer is not  realeased before return.\\
-This is a vulnerability with a \textit{CWE-772 weakness ID}: NULL Pointer Dereference \cite{CWE476}.\\
+This is a vulnerability with a \textit{CWE-772 weakness ID}: Missing Release of Resource after Effective Lifetime \cite{CWE772}.\\
 \newpage
 Portion of the fragment code, affected by the possibile vulnerabilities:
 \begin{lstlisting}[style=c,numbers=left,firstnumber=51,linebackgroundcolor={
@@ -490,21 +490,20 @@ void  main()
 	func3(sizeof(*foo));
 }
 \end{lstlisting}
-Regarding vulnerability CWE-476, a NULL pointer dereference occurs when the application dereferences a pointer that it expects to be valid, but is NULL, typically causing a crash or exit.
+Regarding vulnerability \textit{CWE-476}, a null pointer dereference occurs when the application dereferences a pointer that it expects to be valid, but is null, typically causing a crash or exit.
 Generally this type of vulnerability is related to the reliability of the software, but in some cases if an opponent is able to make this type of vulnerability happen,he might be able to use the resulting exception to bypass security logic or to cause the application to reveal debugging information that will be valuable in planning subsequent attacks \cite{nulldef}.\\
-Regarding vulnerability CWE-772,when a resource is not released after use,causes a memory leak.\\
-A memory leak is an unintentional form of memory consumption whereby the developer fails to free an allocated block of memory when no longer needed \cite{memoryleak}. it can allow attackers to cause a denial of service by causing the allocation of resources without triggering their release\cite{CWE772}.
+Regarding vulnerability \textit{CWE-772},when a resource is not released after use, causes a \textit{memory leak}.\\
+A memory leak is an unintentional form of memory consumption whereby the developer fails to free an allocated block of memory when no longer needed \cite{memoryleak}. It can allow attackers to cause a \textit{denial of service} by causing the allocation of resources without triggering their release \cite{CWE772}.
 
 \newpage
 \noindent
 Based on the previous information, this is the portion of the fragment where \textbf{these} vulnerabilities has been removed:
 \begin{lstlisting}[style=c,numbers=left,firstnumber=86,linebackgroundcolor={
-\ifnum\value{lstnumber}=91\color{green}\fi
-\ifnum\value{lstnumber}=101\color{green}\fi}]
+\ifnum\value{lstnumber}=90\color{green}\fi
+\ifnum\value{lstnumber}=98\color{green}\fi}]
 int  main()
 {
 	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
-	
 	char *buffer = (char *)malloc(10 * sizeof(char));
   if(buffer==NULL)
 	{
@@ -513,31 +512,30 @@ int  main()
 	}
 	strcpy(buffer, foo);
 	func1();
-   
 	func3(sizeof(*foo));
-	
 	free(buffer);
 	return 0;
 }
 
 \end{lstlisting}
-To solve the NULL pointer deference, always check the return value of the malloc function and always release a buffer with the \texttt{free()} function to avoid memory leaks.\\\\
+To solve the NULL pointer deference, always check the return value of the \texttt{malloc} function and always release a buffer with the \texttt{free()} function to avoid memory leaks.\\\\
 
 
 \noindent
-\textbf{func1()}\\
+\subsubsection{func1}
 
 \begin{lstlisting}[style=DOS][language=bash]
 fragment.c:11:3: Return value (type char *) ignored: fgets(buffer, 10...
   Result returned by function call is not used. If this is intended, can cast
   result to (void) to eliminate message. (Use -retvalother to inhibit warning)
 \end{lstlisting}
-The return value of the fgets function is ignored.
+The return value of the \texttt{fgets} function is ignored.
 Ignoring the return value of functions is a potential vulnerability.
 The \textit{CWE-252 weakness ID} \cite{CWE252} 
 describes in detail what could happen to a program in which the return values of the functions are not checked.\\
 If an attacker can force the function to fail or otherwise return a value that is not expected, then the subsequent program logic could lead to a vulnerability, because the software is not in a state that the programmer assumes.\\
-So it's definitely a good practice to always do these kind of checks.\\
+So it's definitely a good practice to always do these kind of checks.
+\newpage
 Portion of the fragment code, affected by the weakness:
 \begin{lstlisting}[style=c,numbers=left,firstnumber=7,linebackgroundcolor={
 \ifnum\value{lstnumber}=11\color{red}\fi
@@ -559,36 +557,36 @@ void func1()
 \end{lstlisting}
 
 \noindent
-Based on the previous information, this is the portion of the fragment where \textbf{the} weakness has been removed:
+Based on the previous information, this is the portion of the fragment where \textbf{the weakness} has been removed:
 \begin{lstlisting}[style=c,numbers=left,firstnumber=7,linebackgroundcolor={
 \ifnum\value{lstnumber}=11\color{green}\fi}]
 void func1()
 {	
 	char buffer[1024];
   printf("Please enter your user id :");
- if(fgets(buffer, 1024, stdin)!=NULL){
- 
-  if (!isalpha(buffer[0]))
+  if(fgets(buffer, 1024, stdin)!=NULL)
   {
+  	if (!isalpha(buffer[0]))
+  	{
 
-     char errormsg[1044];
-     strncpy(errormsg, buffer,1024);
-     strcat(errormsg, " is not  a valid ID");
+      char errormsg[1044];
+      strncpy(errormsg, buffer,1024);
+      strcat(errormsg, " is not  a valid ID");
+ 		}
  	}
- }
- else
- {
-	/* error handling */ 
- }
+ 	else
+ 	{
+		/* error handling if any*/ 
+	}
 }
 
 
 \end{lstlisting}
-Now the return value of the fgets function is checked and in case of errors it is possible to handle the error.
+Now the return value of the \texttt{fgets} function is checked and in case of errors it is possible to handle the error.\\\\
 
 
 \noindent
-\textbf{func2()}\\
+\subsubsection{func2}
 
 \begin{lstlisting}[style=DOS][language=bash]
 fragment.c:27:3: Return value (type ssize_t) ignored: read(f2d, &len, ...
@@ -600,7 +598,7 @@ fragment.c:27:3: Return value (type ssize_t) ignored: read(f2d, &len, ...
 fragment.c:29:3: Return value (type ssize_t) ignored: read(f2d, buf2, len)
 
 \end{lstlisting}
-These warnings are the same warning already analyzed and solved for the func1 function, the one with CWE-252 wakness id. \cite{CWE252}.
+These warnings are the same warning already analyzed and solved for the func1 function, the one with \textit{CWE-252 weakness id} \cite{CWE252}.
 \begin{lstlisting}[style=DOS][language=bash]
  fragment.c:28:10: Storage buf2 may become null
 \end{lstlisting}
@@ -611,7 +609,7 @@ fragment.c:32:2: Fresh storage buf2 not released before return
   before the last reference to it is lost. (Use -mustfreefresh to inhibit
   warning)
 \end{lstlisting}
-These two are the same warnings already analyzed and solved for the \texttt{main()} function, those with \textit{CWE-476} \cite{CWE476}, \textit{CWE-772} \cite{CWE772} \textit{waekness ids}, respectively.
+These two are the same warnings already analyzed and solved for the \texttt{main()} function, those with \textit{CWE-476} \cite{CWE476}, \textit{CWE-772} \cite{CWE772} \textit{weakness ids}, respectively.
 \noindent
 Portion of the fragment code, affected by the possibile vulnerabilities:
 \begin{lstlisting}[style=c,numbers=left,firstnumber=23,linebackgroundcolor={
@@ -638,41 +636,37 @@ void func2(int f2d)
 Based on the previous information, this is the portion of the fragment where \textbf{these} vulnerabilities has been removed:
 \begin{lstlisting}[style=c,numbers=left,firstnumber=23,linebackgroundcolor={
 \ifnum\value{lstnumber}=28\color{green}\fi
-\ifnum\value{lstnumber}=31\color{green}\fi
-\ifnum\value{lstnumber}=36\color{green}\fi
-\ifnum\value{lstnumber}=43\color{green}\fi
-\ifnum\value{lstnumber}=52\color{green}\fi
+\ifnum\value{lstnumber}=35\color{green}\fi
+\ifnum\value{lstnumber}=40\color{green}\fi
+\ifnum\value{lstnumber}=48\color{green}\fi
+\ifnum\value{lstnumber}=44\color{green}\fi
 }]
 void func2(int f2d)
 {
-	char *buf2 = NULL;;
-	size_t len = 0;
-  ssize_t ret = 0;
-  if((ret = read(f2d, &len, sizeof(len)))> 0)
+	char *buf2;
+	size_t len;
+  ssize_t ret;
+  ret = read(f2d, &len, sizeof(len));
+  if(ret < 0)
   {
-  		buf2 = calloc(len+1,sizeof(char));
-			if(buf2 == NULL)
-			{	
-				/*error handling */
-				return;
-			} 
-  		if((ret = read(f2d,buf2, len))>0)
-  		{ 
-  			buf2[ret] = '\0';
-		  
-			}
-			else
-			{
-		 		 free(buf2);
-		  		/*error handling */
-		 		 return;
-			}
-	}
-	else
-	{
-		/* error handling */
-	}
-	free(buf2);
+  	/* error handling */
+  	return;
+  }
+  buf2 = malloc(len+1);
+  if(buf2 == NULL)
+  {	
+		/*error handling */
+		return;
+	} 
+  ret = read(f2d,buf2, len);
+  if(ret <0)
+  {
+		/*error handling*/
+		free(buf2);
+		return;  
+  }
+  buf2[len] = '\0';
+  free(buf2);
 
 }
 
@@ -681,7 +675,7 @@ void func2(int f2d)
 
 \newpage
 \noindent
-\textbf{func3()}\\
+\subsubsection{func3}
 
    
 
@@ -699,12 +693,12 @@ fragment.c:46:3: Return value (type ssize_t) ignored: read(f3d, buf3, len)
 \begin{lstlisting}[style=DOS][language=bash]
 fragment.c:47:2: Fresh storage buf3 not released before return
 \end{lstlisting}
-These warnings represent weaknesses / vulnerabilities already encountered with analyzing the previous functions
+These warnings represent weaknesses/vulnerabilities already encountered with analyzing the previous functions.\\
 Portion of the fragment code, affected by the possibile vulnerabilities:
-\begin{lstlisting}[style=c,numbers=left,firstnumber=54,linebackgroundcolor={
-\ifnum\value{lstnumber}=58\color{red}\fi
-\ifnum\value{lstnumber}=65\color{red}\fi
-\ifnum\value{lstnumber}=66\color{red}\fi
+\begin{lstlisting}[style=c,numbers=left,firstnumber=35,linebackgroundcolor={
+\ifnum\value{lstnumber}=39\color{red}\fi
+\ifnum\value{lstnumber}=46\color{red}\fi
+\ifnum\value{lstnumber}=47\color{red}\fi
 }]
 void func3(int f3d)
 {
@@ -727,36 +721,40 @@ void func3(int f3d)
 Based on the previous information, this is the portion of the fragment where \textbf{these} vulnerabilities and weaknesses have been removed:
 \begin{lstlisting}[style=c,numbers=left,firstnumber=54,linebackgroundcolor={
 \ifnum\value{lstnumber}=59\color{green}\fi
-\ifnum\value{lstnumber}=69\color{green}\fi
-\ifnum\value{lstnumber}=74\color{green}\fi
-\ifnum\value{lstnumber}=77\color{green}\fi
-\ifnum\value{lstnumber}=80\color{green}\fi}]
+\ifnum\value{lstnumber}=71\color{green}\fi
+\ifnum\value{lstnumber}=76\color{green}\fi
+\ifnum\value{lstnumber}=80\color{green}\fi
+\ifnum\value{lstnumber}=83\color{green}\fi}]
 void func3(int f3d)
 {
   char *buf3;
-  int len = 0;
-  ssize_t ret = 0;
-  if((ret=read(f3d, &len, sizeof(len)))<0){
-        /*error_handling*/
-	return;
+  int len;
+  ssize_t ret;
+  ret=read(f3d, &len, sizeof(len));
+  if(ret < 0)
+  {
+    /*error handling*/
+		return;
   }
   if (len > 8000) 
   { 
   	perror("too large length");
   	return; 
 	}
-  buf3 = calloc((size_t)len,sizeof(char));
+  buf3 = malloc((size_t)len);
   if(buf3==NULL)
   {
      /*error_handling*/
      return;
   }
-  if((ret=read(f3d, buf3,(size_t)len))<0)
+  ret=read(f3d, buf3,(size_t)len);
+  if(ret < 0)
   {
      /*error handling */
      free(buf3);
      return;
   }
+  buf3[len] = '\0';
   free(buf3);        
 }
 
@@ -765,8 +763,7 @@ void func3(int f3d)
 
 \begin{SpecialPar}
 \noindent
-\texttt{note}: Not all warnings have been taken into consideration in this splint output analysis.\\
-
+\texttt{note}: Not all warnings have been taken into consideration in this Splint output analysis.\\
 Many of Splint's warnings do not represent a real vulnerability, but suggestions for obtaining a higher quality and more reliable code.\\
 Despite this, most of the warnings have been analyzed and solved in order to obtain a more reliable and error-free code.
 \end{SpecialPar}
@@ -822,9 +819,6 @@ ssize_t func2(int f2d)
 		return -1;
   }
  	buf2 = calloc(len+1,sizeof(char));
-  
-  
-  
   if(buf2==NULL)
   {
   		
@@ -878,8 +872,6 @@ ssize_t func3(int f3d)
   return 0;     
 }
 
-
-
 int  main()
 {
 	char *foo = "fooooooooooooooooooooooooooooooooooooooooooooooooooo";
@@ -918,17 +910,17 @@ A summary of the main changes made:
   \item In the \texttt{func3()} function the vulnerability that caused the sign error and the subsequent buffer overflow was solved by checking that the variable \texttt{len} did not assume negative values.This could happen because len was int.\\
 In the end it was decided to make \texttt{len} a variable of type \texttt{size\_t}, just like in in the \texttt{func2()} function,so you don't have to worry about it taking negative values.
 \item All errors are handled and printed on the standard error.
-All functions return 0 in case of success and -1 in case of failure.\\
-This increases the reliability of the program.
+All functions return 0 in case of success and -1 in case of failure.
 \item All allocated memory blocks are correctly released before each return.
 \item In the absence of particular performance requirements, the \texttt{malloc} function has been replaced by the \texttt{calloc} function, which, although considered less efficient, is safer because in addition to allocating the required memory, it also takes care of its initialization.
+\item after each successful read, the terminator character is added in position \texttt{buffer[ret]} where \texttt{ret} is the number of bytes actually readed, no longer in position \texttt{buffer[len]}, where \texttt{len} represents the number of bytes to read.
 \end{itemize}
 \section{Conclusion}
 
 Flawfinder and Splint are powerful and very useful tools to look for vulnerabilities in your code, correct errors and improve the overall reliability of the program.
 However, they are not infallible.\\
 As we have seen, it can happen that some of the hits are simply false positives. It is therefore unthinkable to rely completely on these tools.\\
-To be able to make the best use of them, a basic knowledge of software security is required to make the right choices and distinguish real vulnerabilities from false positives or find vulnerabilities that these programs can't find.
+To be able to make the best use of them, a basic knowledge of software security is required to make the right choices and distinguish real vulnerabilities from false positives or find vulnerabilities that these programs cannot find.
 
 
 
@@ -960,7 +952,7 @@ Department of Electrical, Computer \& Software Engineering,University of Ontario
 \bibitem{splint} Splint official page,\\\texttt{https://splint.org/}    
 
 \bibitem{splint2} 
-Pedro pereira, Ulisses Costa.
+Pedro Pereira, Ulisses Costa.
 \textit{Splint the C code static checker}.
 Formal Methods in Software Engineering, May 28, 2009
 
